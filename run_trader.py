@@ -109,7 +109,13 @@ class ProfessionalTradingSystem:
         """Handle termination signals"""
         self.logger.info(f"Received signal {sig}, initiating graceful shutdown")
         self.emergency_shutdown = True
-        if not self.shutdown_event.is_set():
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.call_soon_threadsafe(self.shutdown_event.set)
+            else:
+                self.shutdown_event.set()
+        except RuntimeError:
             self.shutdown_event.set()
         
     async def initialize(self):

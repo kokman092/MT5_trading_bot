@@ -15,6 +15,7 @@ class BotManager:
         self.performance_monitor = None
         self.risk_manager = None
         self.regime_detector = None
+        self._init_lock = asyncio.Lock()
         
     @classmethod
     def get_instance(cls):
@@ -31,30 +32,31 @@ class BotManager:
         regime_detector
     ) -> bool:
         """Initialize bot manager with all required components"""
-        try:
-            self.config = config
-            self.broker = broker
-            self.performance_monitor = performance_monitor
-            self.risk_manager = risk_manager
-            self.regime_detector = regime_detector
-            
-            # Validate components
-            if not all([
-                self.config,
-                self.broker,
-                self.performance_monitor,
-                self.risk_manager,
-                self.regime_detector
-            ]):
-                self.logger.error("Missing required components")
-                return False
+        async with self._init_lock:
+            try:
+                self.config = config
+                self.broker = broker
+                self.performance_monitor = performance_monitor
+                self.risk_manager = risk_manager
+                self.regime_detector = regime_detector
                 
-            self.logger.info("Bot manager initialized successfully")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Error initializing bot manager: {str(e)}")
-            return False
+                # Validate components
+                if not all([
+                    self.config,
+                    self.broker,
+                    self.performance_monitor,
+                    self.risk_manager,
+                    self.regime_detector
+                ]):
+                    self.logger.error("Missing required components")
+                    return False
+                    
+                self.logger.info("Bot manager initialized successfully")
+                return True
+                
+            except Exception as e:
+                self.logger.error(f"Error initializing bot manager: {str(e)}")
+                return False
     
     @property
     def is_running(self) -> bool:
