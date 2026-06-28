@@ -136,7 +136,8 @@ class BotManager:
                         
                     # Update risk metrics
                     try:
-                        await self._bot.risk_manager.update_metrics()
+                        acc_info = await self._bot.broker.get_account_info()
+                        self._bot.risk_manager.update_risk_metrics(acc_info['balance'], acc_info['equity'])
                     except Exception as e:
                         self.logger.error(f"Error updating risk metrics: {str(e)}")
                         

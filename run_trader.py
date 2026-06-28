@@ -806,6 +806,24 @@ class ProfessionalTradingSystem:
                 if 'partial_exit' not in exit_params:
                     exit_params['partial_exit'] = {'enabled': True, 'activation_threshold': 0.5, 'step': 0.2}
             
+            # Ensure regime_detection thresholds exist for RegimeDetector
+            regime_det = config.setdefault('regime_detection', {})
+            thresholds = regime_det.setdefault('thresholds', {})
+            
+            market_anal = config.get('market_analysis', {})
+            regime_class = market_anal.get('regime_classification', {})
+            if 'volatile_threshold' not in thresholds:
+                thresholds['volatile_threshold'] = regime_class.get('volatile_threshold', 0.02)
+            if 'trending_threshold' not in thresholds:
+                thresholds['trending_threshold'] = regime_class.get('trending_threshold', 0.7)
+                
+            volatility_class = market_anal.get('volatility', {})
+            volatility_thresh = thresholds.setdefault('volatility', {})
+            if 'low_threshold' not in volatility_thresh:
+                volatility_thresh['low_threshold'] = volatility_class.get('low_threshold', 0.005)
+            if 'high_threshold' not in volatility_thresh:
+                volatility_thresh['high_threshold'] = volatility_class.get('high_threshold', 0.02)
+            
             # Direct injection fallback for MT5 credentials from environment
             mt5_acc = config.setdefault('mt5_account', {})
             if not mt5_acc.get('login'):

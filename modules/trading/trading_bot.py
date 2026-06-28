@@ -3,6 +3,7 @@ import MetaTrader5 as mt5
 import pandas as pd
 from datetime import datetime
 from typing import Dict, Optional, List
+import asyncio
 from .signal import Signal
 from .market_analyzer import MarketAnalyzer
 from .trade_executor import TradeExecutor
@@ -68,7 +69,8 @@ class TradingBot:
                         
                     # Update risk metrics
                     try:
-                        await self.risk_manager.update_metrics()
+                        acc_info = await self.broker.get_account_info()
+                        self.risk_manager.update_risk_metrics(acc_info['balance'], acc_info['equity'])
                     except Exception as e:
                         self.logger.error(f"Error updating risk metrics: {str(e)}")
                         
