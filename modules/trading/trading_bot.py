@@ -20,6 +20,7 @@ class TradingBot:
         self.market_analyzer = MarketAnalyzer(config)
         self.broker = MT5Broker(config)
         self.risk_manager = RiskManager(config)
+        self.risk_manager.broker = self.broker
         self.trade_executor = TradeExecutor(config, self.broker, self.risk_manager)
         self.position_manager = PositionManager(config)
         self.ml_analyzer = MLAnalyzer(config)

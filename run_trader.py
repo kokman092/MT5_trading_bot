@@ -486,6 +486,7 @@ class ProfessionalTradingSystem:
             
             # Initialize risk manager with config
             self.risk_manager = RiskManager(self.config)
+            self.risk_manager.broker = self.broker
             if not await self.risk_manager.initialize():
                 logger.error("Failed to initialize risk manager")
                 return False

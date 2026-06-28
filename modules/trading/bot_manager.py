@@ -40,6 +40,9 @@ class BotManager:
                 self.risk_manager = risk_manager
                 self.regime_detector = regime_detector
                 
+                if self.risk_manager:
+                    self.risk_manager.broker = self.broker
+                
                 # Validate components
                 if not all([
                     self.config,

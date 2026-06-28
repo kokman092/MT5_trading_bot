@@ -26,6 +26,7 @@ class RiskManager:
         """Initialize risk manager with configuration"""
         self.config = config
         self.logger = logging.getLogger(__name__)
+        self.broker = None
         self.daily_stats = {
             'trades': 0,
             'wins': 0,
