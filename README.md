@@ -13,7 +13,7 @@ A sophisticated algorithmic trading system for MetaTrader 5, combining technical
 
 ### 📊 Technical Analysis
 - Multiple technical indicators:
-  - MACD (Moving Average Convergence Divergence)
+  - MACD (Moving Average Convergence Divergence)          
   - RSI (Relative Strength Index)
   - Bollinger Bands
   - ATR (Average True Range)
@@ -169,4 +169,4 @@ Trading forex carries significant risk. This bot is for educational purposes onl
 
 ## Support
 
-For support, please open an issue in the GitHub repository or contact support@yourtrading.com
+For support, please open an issue in the GitHub repository
