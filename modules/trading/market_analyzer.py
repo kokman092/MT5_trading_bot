@@ -248,10 +248,10 @@ class MarketAnalyzer:
                 # If volume is all zeros, try to use tick volume
                 if (df['volume'] == 0).all() and 'tick_volume' in df.columns:
                     df['volume'] = df['tick_volume']
-                    self.logger.warning("Using tick volume instead of real volume")
+                    self.logger.debug("Using tick volume instead of real volume")
                 elif (df['volume'] == 0).all():
                     df['volume'] = 1
-                    self.logger.warning("No valid volume data, using placeholder values")
+                    self.logger.debug("No valid volume data, using placeholder values")
                     
                 # Check for minimum volume if configured
                 min_volume = config.get('min_volume', 0)
@@ -259,16 +259,16 @@ class MarketAnalyzer:
                 if 'symbol' in df.columns and 'XAU' in df['symbol'].iloc[0]:
                     min_volume = min_volume / 100  # Gold typically has lower volume
                 if min_volume > 0 and df['volume'].mean() < min_volume:
-                    self.logger.warning(f"Average volume low: {df['volume'].mean():.2f} < {min_volume}")
+                    self.logger.debug(f"Average volume low: {df['volume'].mean():.2f} < {min_volume}")
             else:
                 # If no volume data, try to use tick volume
                 if 'tick_volume' in df.columns:
                     df['volume'] = df['tick_volume']
-                    self.logger.warning("Using tick volume as volume data")
+                    self.logger.debug("Using tick volume as volume data")
                 else:
                     # If no volume data available, use placeholder
                     df['volume'] = 1
-                    self.logger.warning("No volume data available, using placeholder values")
+                    self.logger.debug("No volume data available, using placeholder values")
                     
             # Log validation errors if any
             if validation_errors:
