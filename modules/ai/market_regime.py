@@ -48,8 +48,7 @@ class MarketRegimeDetector:
                 'momentum': df['momentum']
             })
             
-            # Handle missing values
-            features = features.fillna(method='ffill').fillna(0)
+            features = features.ffill().fillna(0)
             
             return features
             

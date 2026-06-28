@@ -76,8 +76,7 @@ def add_technical_indicators(df):
     df['bb_upper'] = bb.bollinger_hband()
     df['bb_lower'] = bb.bollinger_lband()
     
-    # Fill NaN values
-    df.fillna(method='ffill', inplace=True)
+    df.ffill(inplace=True)
     df.fillna(0, inplace=True)
     
     return df

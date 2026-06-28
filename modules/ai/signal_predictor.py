@@ -41,8 +41,7 @@ class SignalPredictor:
             features['hour'] = df.index.hour
             features['day_of_week'] = df.index.dayofweek
             
-            # Fill missing values
-            features = features.fillna(method='ffill').fillna(0)
+            features = features.ffill().fillna(0)
             
             return features
             

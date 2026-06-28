@@ -168,7 +168,7 @@ class MarketAnalyzer:
                 df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=14)
                 
                 # Forward fill NaN values that might appear at the beginning
-                df.fillna(method='ffill', inplace=True)
+                df.ffill(inplace=True)
                 # Fill any remaining NaN values with 0
                 df.fillna(0, inplace=True)
                 

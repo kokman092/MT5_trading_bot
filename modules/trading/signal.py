@@ -284,6 +284,10 @@ class Signal:
             
         return reward / risk
         
+    def get_risk_reward_ratio(self) -> Optional[float]:
+        """Backward-compatible method to calculate risk-to-reward ratio"""
+        return self.risk_reward_ratio
+        
     @property
     def stop_distance(self) -> float:
         """Calculate stop loss distance in price units"""

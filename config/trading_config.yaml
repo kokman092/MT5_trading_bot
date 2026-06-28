@@ -11,6 +11,8 @@ trading:
     - "EURUSD"
     - "GBPUSD"
     - "USDJPY"
+    - "AUDUSD"
+    - "XAUUSD"
   timeframes:
     primary: "M5"
     secondary: ["M15", "H1"]
