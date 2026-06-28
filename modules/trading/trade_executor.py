@@ -34,6 +34,13 @@ class TradeExecutor:
         self.slippage_tolerance = self.config.get('execution', {}).get('slippage_tolerance', 0.0003)
         self.max_spread_factor = self.config.get('execution', {}).get('max_spread_factor', 1.5)
         
+        # Execution parameters
+        self.execution_params = {
+            'max_spread': self.config.get('execution', {}).get('max_spread', 20),
+            'high_volatility_threshold': self.config.get('execution', {}).get('high_volatility_threshold', 1.5),
+            'limit_order_threshold': self.config.get('execution', {}).get('limit_order_threshold', 0.0005)
+        }
+        
         # Order execution metrics
         self.execution_metrics = {
             'total_orders': 0,
@@ -77,7 +84,7 @@ class TradeExecutor:
         """Execute trade with professional entry management"""
         try:
             # Validate signal
-            if not self._validate_signal(signal):
+            if not await self._validate_signal(signal):
                 return {'success': False, 'error': 'Invalid signal'}
 
             # Check market conditions
