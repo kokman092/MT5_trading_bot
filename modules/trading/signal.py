@@ -113,6 +113,83 @@ class Signal:
     use_advanced_order: bool = False
     advanced_order_type: Optional[str] = None
     
+    def __init__(
+        self,
+        symbol: str,
+        direction: Union[SignalDirection, str] = 'none',
+        timeframe: Union[SignalTimeframe, str] = 'H1',
+        entry_price: float = 0.0,
+        stop_loss: float = 0.0,
+        take_profit: Optional[float] = None,
+        tp_levels: List[Dict[str, float]] = None,
+        timestamp: datetime = None,
+        signal_id: str = None,
+        expiration: Optional[datetime] = None,
+        order_type: Union[OrderType, str] = OrderType.MARKET,
+        position_size: Optional[float] = None,
+        risk_amount: Optional[float] = None,
+        risk_percent: Optional[float] = None,
+        confidence: float = 0.5,
+        strength: Union[SignalStrength, str] = SignalStrength.MODERATE,
+        source: Union[SignalSource, str] = SignalSource.INDICATOR,
+        strategy_type: Union[StrategyType, str] = StrategyType.TREND_FOLLOWING,
+        trigger_indicators: Dict[str, Any] = None,
+        confirming_indicators: Dict[str, Any] = None,
+        description: str = "",
+        market_context: Dict[str, Any] = None,
+        custom_data: Dict[str, Any] = None,
+        use_trailing_stop: bool = False,
+        trailing_stop_trigger: Optional[float] = None,
+        trailing_stop_distance: Optional[float] = None,
+        max_spread: Optional[float] = None,
+        min_volume: Optional[float] = None,
+        slippage_tolerance: Optional[float] = None,
+        use_advanced_order: bool = False,
+        advanced_order_type: Optional[str] = None,
+        **kwargs
+    ):
+        # Map alias 'type' to 'direction'
+        if 'type' in kwargs:
+            direction = kwargs.pop('type')
+        # Map alias 'strategy' to 'strategy_type'
+        if 'strategy' in kwargs:
+            strategy_type = kwargs.pop('strategy')
+            
+        self.symbol = symbol
+        self.direction = direction
+        self.timeframe = timeframe
+        self.entry_price = entry_price
+        self.stop_loss = stop_loss
+        self.take_profit = take_profit
+        self.tp_levels = tp_levels if tp_levels is not None else []
+        self.timestamp = timestamp if timestamp is not None else datetime.now()
+        self.signal_id = signal_id if signal_id is not None else str(uuid.uuid4())
+        self.expiration = expiration
+        self.order_type = order_type
+        self.position_size = position_size
+        self.risk_amount = risk_amount
+        self.risk_percent = risk_percent
+        self.confidence = confidence
+        self.strength = strength
+        self.source = source
+        self.strategy_type = strategy_type
+        self.trigger_indicators = trigger_indicators if trigger_indicators is not None else {}
+        self.confirming_indicators = confirming_indicators if confirming_indicators is not None else {}
+        self.description = description
+        self.market_context = market_context if market_context is not None else {}
+        self.custom_data = custom_data if custom_data is not None else {}
+        self.use_trailing_stop = use_trailing_stop
+        self.trailing_stop_trigger = trailing_stop_trigger
+        self.trailing_stop_distance = trailing_stop_distance
+        self.max_spread = max_spread
+        self.min_volume = min_volume
+        self.slippage_tolerance = slippage_tolerance
+        self.use_advanced_order = use_advanced_order
+        self.advanced_order_type = advanced_order_type
+        
+        # Call __post_init__ to finalize type casting and validation
+        self.__post_init__()
+        
     def __post_init__(self):
         """Convert string enums to proper enum types"""
         if isinstance(self.direction, str):

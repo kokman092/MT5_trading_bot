@@ -112,7 +112,14 @@ class TradingBot:
                 
             # Get ML predictions
             try:
-                ml_signals = await self.ml_analyzer.analyze_market(market_data)
+                ml_result = await self.ml_analyzer.predict(market_data, symbol, timeframe)
+                if ml_result:
+                    ml_signals = {
+                        'direction': ml_result.get('signal'),
+                        'confidence': ml_result.get('confidence', 0.0)
+                    }
+                else:
+                    ml_signals = None
             except Exception as e:
                 self.logger.error(f"Error getting ML signals for {symbol}: {str(e)}")
                 ml_signals = None
