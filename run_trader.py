@@ -770,15 +770,22 @@ class ProfessionalTradingSystem:
             # Ensure critical keys exist by mapping/aliasing if missing
             if 'machine_learning' not in config and 'market_analysis' in config and 'ml' in config['market_analysis']:
                 config['machine_learning'] = config['market_analysis']['ml']
-            elif 'machine_learning' not in config:
-                config['machine_learning'] = {
-                    'hyperparameters': {},
-                    'training': {'min_samples': 1000, 'validation_size': 0.2, 'retrain_interval_hours': 24},
-                    'feature_engineering': {'feature_selection': {'enabled': True, 'n_features': 20}},
-                    'prediction': {'confidence_threshold': 0.65, 'ensemble_threshold': 0.7},
-                    'models': ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm'],
-                    'warmup': {'min_predictions': 50, 'min_accuracy': 0.55}
-                }
+                
+            ml_config = config.setdefault('machine_learning', {})
+            if 'enabled' not in ml_config:
+                ml_config['enabled'] = True
+            if 'models' not in ml_config:
+                ml_config['models'] = ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm']
+            if 'training' not in ml_config:
+                ml_config['training'] = {'min_samples': 1000, 'validation_size': 0.2, 'retrain_interval_hours': 24}
+            if 'prediction' not in ml_config:
+                ml_config['prediction'] = {'confidence_threshold': 0.65, 'ensemble_threshold': 0.7}
+            if 'hyperparameters' not in ml_config:
+                ml_config['hyperparameters'] = {}
+            if 'feature_engineering' not in ml_config:
+                ml_config['feature_engineering'] = {'feature_selection': {'enabled': True, 'n_features': 20}}
+            if 'warmup' not in ml_config:
+                ml_config['warmup'] = {'min_predictions': 50, 'min_accuracy': 0.55}
             
             # Ensure position_management or trading_parameters exit parameters exist
             if 'trading_parameters' not in config:
