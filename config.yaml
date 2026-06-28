@@ -1,0 +1,231 @@
+# Professional Trading Configuration
+
+# MT5 Account Configuration
+mt5_account:
+  login: ${MT5_LOGIN}
+  password: ${MT5_PASSWORD}
+  server: ${MT5_SERVER}
+  timeout: 60000
+  path: null  # Set to custom path if needed
+
+# System Configuration
+system:
+  memory_limit_mb: 1000  # Memory limit in MB before cleanup
+  cpu_limit_percent: 80  # CPU usage limit in percent
+  log_level: "INFO"      # Logging level (DEBUG, INFO, WARNING, ERROR)
+  multithreading:
+    enabled: true        # Enable multithreading
+    max_workers: 4       # Maximum number of worker threads
+  async:
+    max_concurrent_tasks: 16  # Maximum number of concurrent async tasks
+  cache:
+    enabled: true        # Enable data caching
+    ttl_minutes: 15      # Time-to-live for cached data in minutes
+    max_items: 1000      # Maximum number of items in cache
+  health_check:
+    interval_minutes: 5  # Health check interval in minutes
+    reconnect_attempts: 3  # Number of reconnect attempts
+    timeout_seconds: 30  # Timeout for operations
+  performance:
+    monitor_interval_seconds: 60  # Performance monitoring interval
+    log_metrics: true    # Log performance metrics
+    slow_operation_threshold_ms: 1000  # Threshold for slow operation warning
+  cleanup:
+    interval_minutes: 30  # Memory cleanup interval
+  backups:
+    enabled: true        # Enable data backups
+    interval_minutes: 60  # Backup interval in minutes
+    max_backups: 5       # Maximum number of backup files to keep
+
+# Trading configuration
+trading:
+  symbols:
+    - 'EURUSD'
+    - 'GBPUSD'
+    - 'USDJPY'
+    - 'AUDUSD'
+  timeframes:
+    - 'M5'
+    - 'M15'
+    - 'H1'
+  update_interval: 5  # Update interval in seconds
+  max_symbols_per_cycle: 2  # Maximum number of symbols to process in one cycle
+  parallel_analysis: true   # Enable parallel analysis of multiple symbols
+  sessions:
+    london:
+      start: "08:00"
+      end: "16:00"
+    newyork:
+      start: "13:00"
+      end: "21:00"
+    tokyo:
+      start: "00:00"
+      end: "08:00"
+  position_management:
+    risk_limits:
+      max_positions_per_symbol: 2
+      max_daily_loss_per_symbol: 0.02
+      max_drawdown_per_symbol: 0.05
+      position_timeout: 28800  # 8 hours in seconds
+    order_types:
+      entry: ["MARKET", "LIMIT"]
+      exit: ["MARKET", "STOP", "LIMIT"]
+    timeframes: ["M5", "M15", "H1"]
+    volume_profile:
+      base_lot: 0.01
+      increment: 0.01
+      max_lots: 1.0
+  data_optimization:
+    cache_historical_data: true
+    max_bars: 1000  # Maximum number of bars to request
+    prefetch_enabled: true  # Prefetch data for upcoming analysis
+    update_only_active_symbols: true  # Only update data for symbols with open positions
+  execution:
+    max_retries: 3
+    retry_delay_ms: 100
+    timeout_ms: 5000
+    max_slippage_points: 10
+    use_market_orders_on_timeout: true
+
+# Risk management settings
+risk_management:
+  enabled: true
+  risk_per_trade: 0.01  # Reduced to 1% per trade for professional risk management
+  emergency_stop:
+    max_daily_loss_percent: 3.0
+    max_consecutive_losses: 5
+    max_drawdown_percent: 5.0
+  adaptive_position_sizing:
+    enabled: true
+    base_sizing: "fixed"  # fixed, kelly, optimal-f
+    scale_factor: 1.0
+    increase_after_wins: 3
+    decrease_after_losses: 2
+  portfolio:
+    max_correlation: 0.7
+    max_exposure_per_instrument: 0.3
+    sector_limits:
+      forex: 0.7
+      indices: 0.4
+      commodities: 0.3
+      crypto: 0.2
+  volatility_adjustment:
+    enabled: true
+    lookback_periods: 20
+    atr_multiplier: 1.5
+  drawdown_protection:
+    enabled: true
+    recovery_mode_threshold: 0.05  # 5% drawdown
+    recovery_risk_factor: 0.5      # Reduce risk by 50% in recovery mode
+
+# Market analyzer configuration
+market_analyzer:
+  indicators:
+    - name: "RSI"
+      params: {period: 14, overbought: 70, oversold: 30}
+    - name: "MACD"
+      params: {fast_period: 12, slow_period: 26, signal_period: 9}
+    - name: "Bollinger Bands"
+      params: {period: 20, deviations: 2}
+  optimization:
+    multithreaded: true
+    indicators_per_thread: 5
+    batch_calculations: true
+  filter:
+    min_volatility: 0.001
+    max_spread_pips: 5
+
+# Data collection and storage
+data:
+  storage:
+    use_database: false
+    database_uri: "sqlite:///trading_data.db"
+    csv_enabled: true
+    csv_directory: "data/market_data"
+  collection:
+    tick_data: false
+    bar_data: true
+    market_depth: false
+    bar_aggregation: true
+
+# Performance monitoring
+performance_monitoring:
+  enabled: true
+  metrics:
+    - "win_rate"
+    - "sharpe_ratio"
+    - "drawdown"
+    - "profit_factor"
+  report_interval_minutes: 60
+  detailed_logging: true
+  alert_thresholds:
+    drawdown_percent: 5
+    consecutive_losses: 5
+    win_rate_minimum: 0.4
+  system_monitoring:
+    memory_usage: true
+    cpu_usage: true
+    network_latency: true
+    mt5_response_time: true
+  optimization:
+    auto_adjust: true
+    adjustment_interval_hours: 24
+
+# Error handling
+error_handling:
+  retry_operations: true
+  max_retries: 3
+  exponential_backoff: true
+  log_full_exceptions: true
+  critical_errors:
+    - "CONNECTION_LOST"
+    - "ACCOUNT_BLOCKED"
+    - "INSUFFICIENT_MARGIN"
+  notifications:
+    email: false
+    telegram: false
+    desktop: true
+
+# Database and logging
+database:
+  enabled: false
+  connection_pool_size: 5
+  timeout_seconds: 30
+  query_cache_enabled: true
+  
+# Notifications
+notifications:
+  enabled: true
+  channels:
+    telegram: false
+    email: false
+    desktop: true
+  events:
+    trade_executed: true
+    position_closed: true
+    error_occurred: true
+    performance_report: true
+    risk_threshold_reached: true
+
+# Performance Monitoring
+performance_monitoring:
+  report_interval: 3600  # 1 hour
+  metrics:
+    - "sharpe_ratio"
+    - "max_drawdown"
+    - "win_rate"
+    - "profit_factor"
+    - "average_win"
+    - "average_loss"
+  alerts:
+    max_drawdown: 0.10
+    daily_loss: 0.05
+    consecutive_losses: 5
+    low_win_rate: 0.40
+
+# System Requirements
+system:
+  min_memory: 4096  # MB
+  min_cpu_cores: 4
+  min_disk_space: 10240  # MB
+  python_version: "3.8" 

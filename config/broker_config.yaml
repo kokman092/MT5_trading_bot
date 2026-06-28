@@ -1,0 +1,181 @@
+# Broker Configuration
+
+# MetaTrader 5 Configuration
+
+# MetaTrader 5 Settings
+mt5_enabled: true
+mt5:
+  login: YOUR_MT5_LOGIN
+  password: YOUR_MT5_PASSWORD
+  server: YOUR_MT5_SERVER
+  timeout: 60000
+  
+  # Trading Symbols
+  symbols:
+    major_pairs:
+      - EURUSD
+      - GBPUSD
+      - USDJPY
+      - USDCHF
+      - AUDUSD
+      - USDCAD
+    cross_pairs:
+      - EURGBP
+      - EURJPY
+      - GBPJPY
+    commodities:
+      - XAUUSD  # Gold
+      - XAGUSD  # Silver
+      - XTIUSD  # Oil
+    indices:
+      - US30
+      - US500
+      - USTEC
+  
+  # Risk Settings
+  risk_settings:
+    max_spread:
+      EURUSD: 1.5
+      GBPUSD: 1.8
+      USDJPY: 2.0
+      default: 3.0
+    slippage: 2
+    max_leverage: 100
+    margin_call_level: 80
+    stop_out_level: 50
+    
+  # Trading Sessions
+  trading_sessions:
+    asian:
+      start: "00:00"
+      end: "08:00"
+      active: true
+    london:
+      start: "08:00"
+      end: "16:00"
+      active: true
+    new_york:
+      start: "13:00"
+      end: "21:00"
+      active: true
+      
+  # Order Settings
+  order_settings:
+    default_lot_size: 0.01
+    min_lot_size: 0.01
+    max_lot_size: 10.0
+    lot_step: 0.01
+    use_market_orders: true
+    use_pending_orders: true
+    pending_order_expiry: 24  # hours
+    
+  # Expert Settings
+  expert_settings:
+    magic_number: 234000
+    comment: "MT5 Auto Trader"
+    deviation: 10
+    async_mode: true
+    
+# Risk Management
+risk_management:
+  max_daily_risk: 0.02        # 2% maximum daily risk
+  max_position_risk: 0.01     # 1% risk per position
+  max_drawdown: 0.05          # 5% maximum drawdown
+  max_open_positions: 5       # Maximum simultaneous positions
+  max_daily_trades: 10        # Maximum trades per day
+  position_sizing:
+    conservative: 0.5         # 50% of calculated size
+    moderate: 0.75           # 75% of calculated size
+    aggressive: 1.0          # 100% of calculated size
+    
+# Performance Thresholds
+performance_thresholds:
+  min_win_rate: 0.60         # Minimum 60% win rate
+  min_profit_factor: 1.5     # Minimum profit factor
+  max_consecutive_losses: 3
+  min_trades_per_day: 2
+  max_trades_per_day: 8
+  
+# Recovery Settings
+recovery_settings:
+  use_recovery_mode: true
+  max_recovery_attempts: 2
+  recovery_multiplier: 1.5
+  min_recovery_profit: 0.5    # 50% of original target
+  
+# Optimization Settings
+optimization:
+  auto_adjust_settings: true
+  optimization_period: 24     # hours
+  min_optimization_trades: 50
+  performance_weight: 0.7
+  risk_weight: 0.3
+  
+# Logging Settings
+logging:
+  log_level: INFO
+  save_trades: true
+  save_performance: true
+  backup_interval: 24         # hours
+
+# Interactive Brokers Settings
+ib_enabled: false  # Set to true when using IB
+interactive_brokers:
+  host: localhost
+  port: 7497
+  client_id: 1
+  account_type: INDIVIDUAL
+  base_currency: USD
+  symbols:
+    - AAPL
+    - MSFT
+    - GOOGL
+  risk_settings:
+    max_position_value: 100000
+    
+# OANDA Settings
+oanda_enabled: false  # Set to true when using OANDA
+oanda:
+  access_token: YOUR_OANDA_TOKEN
+  account_id: YOUR_OANDA_ACCOUNT
+  environment: practice  # or 'live'
+  symbols:
+    - EUR_USD
+    - GBP_USD
+    - USD_JPY
+  risk_settings:
+    max_leverage: 20
+    
+# FXCM Settings
+fxcm_enabled: false  # Set to true when using FXCM
+fxcm:
+  access_token: YOUR_FXCM_TOKEN
+  server: demo  # or 'real'
+  symbols:
+    - EUR/USD
+    - GBP/USD
+    - USD/JPY
+  risk_settings:
+    max_leverage: 30
+    
+# Binance Settings
+binance_enabled: false  # Set to true when using Binance
+binance:
+  api_key: YOUR_BINANCE_KEY
+  api_secret: YOUR_BINANCE_SECRET
+  testnet: true  # Set to false for live trading
+  symbols:
+    - BTCUSDT
+    - ETHUSDT
+    - BNBUSDT
+  risk_settings:
+    max_position_size: 1.0
+    max_leverage: 10
+
+# Broker Weights (must sum to 1.0)
+broker_weights:
+  mt5: 0.3          # 30% allocation
+  interactive_brokers: 0.2  # 20% allocation
+  oanda: 0.15       # 15% allocation
+  fxcm: 0.15        # 15% allocation
+  binance: 0.2      # 20% allocation 

@@ -1,0 +1,149 @@
+# MT5 Account Configuration
+mt5_account:
+  login: ${MT5_LOGIN}  # From environment variable
+  password: ${MT5_PASSWORD}  # From environment variable
+  server: ${MT5_SERVER}  # From environment variable
+  path: "C:\\Program Files\\MetaTrader 5"  # Default MT5 installation path
+
+# Trading Parameters
+trading:
+  symbols:
+    - "EURUSD"
+    - "GBPUSD"
+    - "USDJPY"
+  timeframes:
+    primary: "M5"
+    secondary: ["M15", "H1"]
+  session_times:
+    start: "00:00"
+    end: "23:59"
+  max_positions: 5
+  max_positions_per_symbol: 2
+  entry_conditions:
+    min_signal_strength: 0.7
+    min_trend_strength: 25  # ADX value
+    min_volatility: 0.0001
+    max_volatility: 0.01
+    min_risk_reward: 1.5
+
+# Risk Management
+risk_management:
+  account_risk_per_trade: 0.02  # 2% per trade
+  max_daily_risk: 0.06  # 6% per day
+  max_drawdown: 0.15  # 15% maximum drawdown
+  position_sizing:
+    method: "risk_based"  # risk_based, fixed_size, or position_score
+    fixed_size: 0.01  # if using fixed_size method
+  stop_loss:
+    method: "atr_based"  # atr_based, support_resistance, or fixed_points
+    atr_multiplier: 1.5
+    min_points: 20
+    max_points: 100
+  take_profit:
+    method: "risk_reward"  # risk_reward, fibonacci, or fixed_points
+    risk_reward_ratio: 2.0
+    min_points: 40
+    max_points: 200
+  trailing_stop:
+    enabled: true
+    activation_threshold: 0.5  # % of take profit
+    step: 0.2  # % of ATR
+
+# Market Analysis
+market_analysis:
+  technical_indicators:
+    moving_averages:
+      - 20
+      - 50
+      - 200
+    rsi:
+      period: 14
+      overbought: 70
+      oversold: 30
+    macd:
+      fast_period: 12
+      slow_period: 26
+      signal_period: 9
+    atr:
+      period: 14
+    bollinger:
+      period: 20
+      std_dev: 2
+  support_resistance:
+    window: 20
+    num_points: 5
+    tolerance: 0.001
+  volume_profile:
+    num_bins: 20
+    value_area_volume: 0.7
+  market_regime:
+    volatility_threshold: 80  # percentile
+    trend_threshold: 25  # ADX value
+    momentum_threshold: 0.7  # correlation coefficient
+
+# Strategy Parameters
+strategy:
+  trend_following:
+    enabled: true
+    min_trend_strength: 25
+    trend_confirmation_timeframes: ["M15", "H1"]
+  breakout:
+    enabled: true
+    min_volatility_percentile: 70
+    volume_confirmation: true
+  reversal:
+    enabled: true
+    divergence_window: 20
+    pattern_recognition: true
+  filters:
+    correlation:
+      max_correlation: 0.7
+      lookback_period: 20
+    news:
+      avoid_high_impact: true
+      buffer_minutes: 30
+
+# Execution Settings
+execution:
+  order_type: "market"  # market or pending
+  slippage_points: 3
+  retry_attempts: 3
+  retry_delay_seconds: 1
+  partial_exits:
+    enabled: true
+    levels: [0.3, 0.5, 0.7]
+  break_even:
+    enabled: true
+    trigger_ratio: 0.5
+
+# Logging and Monitoring
+logging:
+  level: "INFO"
+  file_path: "logs/trading.log"
+  max_files: 7
+  console_output: true
+  trade_journal:
+    enabled: true
+    path: "logs/trade_journal.csv"
+  performance_metrics:
+    enabled: true
+    path: "logs/performance.csv"
+
+# Web Interface
+web_interface:
+  enabled: true
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+  ssl:
+    enabled: false
+    cert_path: ""
+    key_path: ""
+  authentication:
+    required: true
+    session_timeout: 3600
+  features:
+    live_charts: true
+    trade_history: true
+    performance_analytics: true
+    system_monitoring: true 

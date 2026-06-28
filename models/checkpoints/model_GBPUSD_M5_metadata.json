@@ -1,0 +1,10 @@
+{
+    "symbol": "GBPUSD",
+    "timeframe": "M5",
+    "training_history": {
+        "accuracy": 0.5012525320053101,
+        "val_accuracy": 0.5005009770393372,
+        "loss": 0.6947283148765564,
+        "val_loss": 0.6934671401977539
+    }
+}

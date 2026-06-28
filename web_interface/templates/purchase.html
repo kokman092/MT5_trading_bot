@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Purchase {{ plan.tier.value|title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Purchase {{ plan.tier.value|title }} Plan</h3>
+            </div>
+            <div class="card-body">
+                <form id="payment-form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label d-block">Billing Cycle</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="billing_cycle" id="monthly" value="monthly" checked>
+                            <label class="btn btn-outline-primary" for="monthly">
+                                Monthly
+                                <div class="small">${{ "%.2f"|format(plan.monthly_price) }}/month</div>
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="billing_cycle" id="annual" value="annual">
+                            <label class="btn btn-outline-primary" for="annual">
+                                Annual
+                                <div class="small">${{ "%.2f"|format(plan.annual_price/12) }}/month</div>
+                                {% if plan.monthly_price > 0 %}
+                                <div class="badge bg-success">Save {{ ((1 - plan.annual_price/(plan.monthly_price*12)) * 100)|round }}%</div>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Plan Features:</h5>
+                        <ul class="feature-list">
+                            {% for feature in plan.features %}
+                            <li>{{ feature }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div id="card-element" class="mb-3">
+                        <!-- Stripe card element will be inserted here -->
+                    </div>
+                    
+                    <div id="card-errors" class="alert alert-danger d-none"></div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100" id="submit-button">
+                        <span id="button-text">Purchase Now</span>
+                        <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    
+    // Create card element
+    const card = elements.create('card');
+    card.mount('#card-element');
+    
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    const cardErrors = document.getElementById('card-errors');
+    
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        // Disable form submission
+        submitButton.disabled = true;
+        buttonText.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        
+        try {
+            // Create checkout session
+            const response = await fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'email': document.getElementById('email').value,
+                    'tier': '{{ plan.tier.value }}',
+                    'billing_cycle': document.querySelector('input[name="billing_cycle"]:checked').value
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Redirect to Stripe checkout
+            const result = await stripe.redirectToCheckout({
+                sessionId: data.sessionId
+            });
+            
+            if (result.error) {
+                throw new Error(result.error.message);
+            }
+            
+        } catch (error) {
+            cardErrors.textContent = error.message;
+            cardErrors.classList.remove('d-none');
+            submitButton.disabled = false;
+            buttonText.classList.remove('d-none');
+            spinner.classList.add('d-none');
+        }
+    });
+</script>
+{% endblock %}

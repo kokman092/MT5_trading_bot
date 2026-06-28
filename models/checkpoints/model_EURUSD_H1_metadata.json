@@ -1,0 +1,10 @@
+{
+    "symbol": "EURUSD",
+    "timeframe": "H1",
+    "training_history": {
+        "accuracy": 0.4982464909553528,
+        "val_accuracy": 0.5145290493965149,
+        "loss": 0.6955875754356384,
+        "val_loss": 0.6935200691223145
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "symbol": "USDJPY",
+    "timeframe": "M5",
+    "training_history": {
+        "accuracy": 0.5018787384033203,
+        "val_accuracy": 0.5065129995346069,
+        "loss": 0.6945357322692871,
+        "val_loss": 0.6939536333084106
+    }
+}

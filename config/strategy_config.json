@@ -1,0 +1,94 @@
+{
+    "trading": {
+        "SYMBOL": "EURUSD",
+        "TIMEFRAME": "H1",
+        "MAX_POSITIONS": 5,
+        "RISK_PER_TRADE": 0.02,
+        "MAX_RISK_TOTAL": 0.10,
+        "USE_TRAILING_STOP": true,
+        "TRAILING_STOP_ACTIVATION": 0.5,
+        "MARGIN_REQUIREMENT": 1.5,
+        "MAX_CONSECUTIVE_LOSSES": 3,
+        "MIN_TIME_BETWEEN_TRADES_HOURS": 1,
+        "TRADING_HOURS": {
+            "START": 2,
+            "END": 22
+        }
+    },
+    "indicators": {
+        "RSI": {
+            "PERIOD": 14,
+            "OVERSOLD": 40,
+            "OVERBOUGHT": 60
+        },
+        "MACD": {
+            "FAST": 12,
+            "SLOW": 26,
+            "SIGNAL": 9
+        },
+        "BOLLINGER": {
+            "PERIOD": 20,
+            "STD_DEV": 2
+        },
+        "ATR": {
+            "PERIOD": 14,
+            "TP_MULTIPLIER": 3,
+            "SL_MULTIPLIER": 2
+        },
+        "STOCHASTIC": {
+            "K_PERIOD": 14,
+            "D_PERIOD": 3,
+            "OVERSOLD": 30,
+            "OVERBOUGHT": 70
+        },
+        "EMA": {
+            "FAST": 50,
+            "SLOW": 200
+        },
+        "ADX": {
+            "PERIOD": 14,
+            "TREND_STRENGTH": 25
+        }
+    },
+    "machine_learning": {
+        "MODEL_PATH": "models/trading_model.joblib",
+        "RETRAIN_INTERVAL_DAYS": 7,
+        "MIN_TRAINING_SAMPLES": 1000,
+        "PREDICTION_THRESHOLD": 0.65,
+        "FEATURE_IMPORTANCE_THRESHOLD": 0.02,
+        "ENSEMBLE": {
+            "RF_ESTIMATORS": 100,
+            "RF_MAX_DEPTH": 5,
+            "RF_MIN_SAMPLES_SPLIT": 50,
+            "GB_ESTIMATORS": 100,
+            "GB_MAX_DEPTH": 4,
+            "GB_LEARNING_RATE": 0.1
+        }
+    },
+    "portfolio": {
+        "CORRELATION_THRESHOLD": 0.7,
+        "VOLATILITY_WINDOW": 20,
+        "MIN_TRADES_FOR_ANALYSIS": 30,
+        "RISK_FREE_RATE": 0.02,
+        "MAX_CORRELATION": 0.8,
+        "MIN_SHARPE_RATIO": 0.5
+    },
+    "risk_management": {
+        "DAILY_LOSS_LIMIT": -0.02,
+        "WEEKLY_LOSS_LIMIT": -0.05,
+        "POSITION_SIZE_ADJUSTMENTS": {
+            "HIGH_VOLATILITY_THRESHOLD": 1.0,
+            "LOW_VOLATILITY_THRESHOLD": 0.2,
+            "HIGH_VOLATILITY_FACTOR": 0.5,
+            "LOW_VOLATILITY_FACTOR": 1.5,
+            "CONSECUTIVE_LOSS_FACTOR": 0.7
+        }
+    },
+    "reporting": {
+        "LOG_LEVEL": "INFO",
+        "SAVE_TRADES": true,
+        "TRADE_HISTORY_FILE": "data/trade_history.csv",
+        "METRICS_UPDATE_INTERVAL": 3600,
+        "PERFORMANCE_REPORT_FILE": "reports/performance.json"
+    }
+}

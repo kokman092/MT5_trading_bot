@@ -1,0 +1,415 @@
+{
+    "mt5": {
+        "login": 12345678,
+        "server": "MetaQuotes-Demo",
+        "timeout_ms": 60000
+    },
+    "trading": {
+        "symbols": ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "XAUUSD"],
+        "timeframes": ["M5", "M15", "H1"],
+        "session_start": "00:00",
+        "session_end": "23:59",
+        "max_spread_pips": 3.0,
+        "min_profit_pips": 5.0
+    },
+    "market_analysis": {
+        "timeframes": ["M1", "M5", "M15", "H1"],
+        "entry_filters": {
+            "min_volatility": 0.0002,
+            "max_volatility": 0.02,
+            "max_spread": 0.0004,
+            "min_atr": 8,
+            "max_atr": 120,
+            "volume_threshold": 800
+        },
+        "volatility_filters": {
+            "atr": {
+                "period": 14,
+                "min_threshold": 0.0002,
+                "max_threshold": 0.02,
+                "spread_ratio": 0.6
+            },
+            "daily_range": {
+                "min": 40,
+                "max": 600
+            }
+        },
+        "momentum_filters": {
+            "rsi": {
+                "period": 14,
+                "overbought": 75,
+                "oversold": 25,
+                "signal_threshold": 0.6
+            },
+            "adx": {
+                "period": 14,
+                "trend_threshold": 22
+            }
+        },
+        "technical_indicators": {
+            "rsi": {
+                "period": 14,
+                "overbought": 70,
+                "oversold": 30
+            },
+            "moving_averages": {
+                "fast": 10,
+                "slow": 30
+            },
+            "bollinger": {
+                "period": 20,
+                "std_dev": 2
+            },
+            "atr": {
+                "period": 14
+            },
+            "macd": {
+                "fast": 12,
+                "slow": 26,
+                "signal": 9
+            }
+        },
+        "validation": {
+            "min_data_points": 15,
+            "max_time_gap": "4 hours",
+            "max_price_change": 0.5,
+            "max_nan_percentage": 0.7,
+            "volume_validation": {
+                "enabled": false,
+                "max_nan_percentage": 1.0,
+                "ignore_missing": true
+            },
+            "price_validation": {
+                "enabled": true,
+                "min_tick_size": 0.00001,
+                "max_spread": 0.0050
+            },
+            "data_quality": {
+                "min_samples": 15,
+                "max_gaps": 50,
+                "max_zero_values": 30,
+                "ignore_volume_data": true
+            }
+        },
+        "regime_thresholds": {
+            "high_volatility": 0.02,
+            "strong_trend": 1.5
+        },
+        "trend": {
+            "min_strength": 0.2,
+            "confirmation_periods": 3,
+            "lookback_periods": 20,
+            "indicators": {
+                "sma": true,
+                "ema": true,
+                "macd": true,
+                "adx": true
+            },
+            "thresholds": {
+                "adx_strong": 25,
+                "adx_very_strong": 35,
+                "trend_strength": 0.3,
+                "momentum_threshold": 0.1
+            }
+        },
+        "correlation_analysis": {
+            "enabled": true,
+            "lookback_periods": 50,
+            "min_correlation": -0.8,
+            "max_correlation": 0.8,
+            "update_interval": 60,
+            "pairs_analysis": true,
+            "group_analysis": true,
+            "threshold_adjustment": 0.1,
+            "dynamic_timeframe": true,
+            "metrics": ["price", "volatility"],
+            "filters": {
+                "min_samples": 30,
+                "significance_level": 0.05,
+                "outlier_std": 3
+            }
+        },
+        "market_conditions": {
+            "analysis_timeframes": ["M5", "M15", "H1"],
+            "volatility": {
+                "high_threshold": 0.02,
+                "low_threshold": 0.005,
+                "atr_period": 14,
+                "atr_multiplier": 1.5
+            },
+            "trend": {
+                "strong_threshold": 0.03,
+                "weak_threshold": 0.01,
+                "lookback_periods": 20
+            },
+            "momentum": {
+                "strong_threshold": 0.02,
+                "weak_threshold": 0.005,
+                "rsi_period": 14,
+                "macd_fast": 12,
+                "macd_slow": 26,
+                "macd_signal": 9
+            },
+            "support_resistance": {
+                "levels_lookback": 50,
+                "level_significance": 0.1,
+                "min_touches": 2,
+                "price_threshold": 0.001
+            },
+            "regime_classification": {
+                "trending_threshold": 0.7,
+                "ranging_threshold": 0.3,
+                "volatile_threshold": 0.02
+            }
+        },
+        "regime_detection": {
+            "enabled": true,
+            "update_interval": 300,
+            "min_data_points": 50,
+            "methods": {
+                "hmm": {
+                    "enabled": true,
+                    "n_states": 3,
+                    "min_samples": 100
+                },
+                "clustering": {
+                    "enabled": true,
+                    "n_clusters": 3,
+                    "features": ["volatility", "trend"]
+                },
+                "change_point": {
+                    "enabled": true,
+                    "window_size": 30,
+                    "threshold": 0.02
+                }
+            },
+            "features": {
+                "price": true,
+                "volume": false,
+                "volatility": true,
+                "momentum": true
+            },
+            "thresholds": {
+                "regime_change": 0.7,
+                "confidence": 0.6,
+                "minimum_duration": 5
+            }
+        },
+        "ml": {
+            "features": [
+                "close",
+                "open",
+                "high",
+                "low",
+                "volume",
+                "rsi",
+                "macd",
+                "macd_signal",
+                "bollinger_upper",
+                "bollinger_lower",
+                "atr",
+                "adx",
+                "cci",
+                "mfi",
+                "stoch_k",
+                "stoch_d",
+                "price_momentum",
+                "volume_momentum",
+                "trend_strength",
+                "volatility_regime"
+            ],
+            "derived_features": [
+                "price_momentum",
+                "volume_momentum",
+                "trend_strength",
+                "volatility_regime",
+                "support_resistance"
+            ],
+            "target": "direction",
+            "lookback": 20,
+            "train_split": 0.8,
+            "prediction_threshold": 0.55,
+            "retrain_interval": 72,
+            "min_train_samples": 300,
+            "model_params": {
+                "lstm_units": [64, 32],
+                "dense_units": [32, 16],
+                "dropout_rate": 0.2,
+                "learning_rate": 0.001,
+                "batch_size": 32,
+                "epochs": 50,
+                "early_stopping_patience": 5
+            },
+            "validation": {
+                "min_confidence": 0.55,
+                "performance_threshold": 0.55,
+                "rolling_window_size": 100
+            }
+        }
+    },
+    "execution": {
+        "max_spread": 0.0005,
+        "max_slippage": 3,
+        "retry_attempts": 3,
+        "retry_delay": 1,
+        "min_volume": 0.01,
+        "max_volume": 1.0,
+        "volume_step": 0.01,
+        "emergency_close_spread": 0.002,
+        "max_position_count": 5,
+        "min_distance_to_orders": 20,
+        "max_slippage_percent": 0.1,
+        "min_volume_for_market": 0.01
+    },
+    "risk_management": {
+        "enabled": true,
+        "risk_per_trade": 0.02,
+        "min_risk_reward_ratio": 1.5,
+        "stop_loss_atr_multiplier": 2.0,
+        "take_profit_atr_multiplier": 3.0,
+        "max_daily_loss": 0.05,
+        "max_position_size": 0.5,
+        "position_sizing": {
+            "max_size": 0.01,
+            "min_size": 0.001,
+            "size_increment": 0.001,
+            "max_total_risk": 0.06
+        },
+        "loss_limits": {
+            "max_daily_loss": 0.05,
+            "max_drawdown": 0.10,
+            "trailing_drawdown": 0.05
+        },
+        "position_limits": {
+            "max_positions": 5,
+            "max_positions_per_symbol": 2,
+            "max_correlation": 0.7,
+            "max_exposure_per_symbol": 0.03
+        },
+        "dynamic_risk": {
+            "enabled": true,
+            "volatility_multiplier": 0.8,
+            "atr_period": 14,
+            "max_risk_multiplier": 2.0,
+            "min_risk_multiplier": 0.5,
+            "win_streak_bonus": 0.1,
+            "loss_streak_penalty": 0.2
+        },
+        "risk_limits": {
+            "max_open_positions": 5,
+            "max_daily_trades": 20,
+            "max_position_size": 1.0,
+            "max_total_risk": 0.05,
+            "max_correlation": 0.7,
+            "drawdown_limit": 0.1,
+            "max_leverage": 30,
+            "min_margin_level": 200,
+            "max_spread_multiplier": 1.5
+        },
+        "config_file": "config/risk_management.json"
+    },
+    "trading": {
+        "symbols": ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
+        "entry_conditions": {
+            "min_signal_strength": 0.55,
+            "max_spread": 0.0006,
+            "min_volume": 0.01,
+            "session_multipliers": {
+                "asian": 0.8,
+                "london": 1.2,
+                "new_york": 1.2,
+                "overlap": 1.3
+            }
+        },
+        "exit_conditions": {
+            "trailing_stop": true,
+            "trailing_distance": 50,
+            "profit_target": 0.02,
+            "max_loss": 0.01
+        },
+        "position_management": {
+            "risk_limits": {
+                "max_positions_per_symbol": 2,
+                "max_daily_loss_per_symbol": 0.02,
+                "max_drawdown_per_symbol": 0.05,
+                "position_timeout": 28800
+            },
+            "order_types": {
+                "entry": ["MARKET", "LIMIT"],
+                "exit": ["MARKET", "STOP", "LIMIT"]
+            },
+            "timeframes": ["M5", "M15", "H1"],
+            "volume_profile": {
+                "base_lot": 0.01,
+                "increment": 0.01,
+                "max_lots": 1.0
+            }
+        },
+        "sessions": {
+            "asian": {
+                "start": "00:00",
+                "end": "08:00",
+                "volatility_adjustment": 0.8
+            },
+            "london": {
+                "start": "08:00",
+                "end": "16:00",
+                "volatility_adjustment": 1.2
+            },
+            "new_york": {
+                "start": "13:00",
+                "end": "21:00",
+                "volatility_adjustment": 1.2
+            },
+            "overlap": {
+                "start": "13:00",
+                "end": "16:00",
+                "volatility_adjustment": 1.3
+            }
+        },
+        "dynamic_thresholds": {
+            "enabled": true,
+            "volatility_based_adjustment": true,
+            "session_based_adjustment": true,
+            "volume_based_adjustment": true,
+            "adjustment_factors": {
+                "high_volatility": 0.9,
+                "low_volatility": 1.1,
+                "high_volume": 1.1,
+                "low_volume": 0.9
+            }
+        }
+    },
+    "trading_parameters": {
+        "execution": {
+            "max_spread": 0.0004,
+            "min_volume": 0.01,
+            "max_volume": 0.1,
+            "update_interval": 1,
+            "retry_attempts": 3,
+            "retry_delay": 1
+        },
+        "exit_parameters": {
+            "stop_loss": {
+                "atr_multiplier": 2.0,
+                "min_distance": 10,
+                "max_distance": 100
+            },
+            "take_profit": {
+                "atr_multiplier": 3.0,
+                "min_distance": 15,
+                "max_distance": 150
+            },
+            "trailing_stop": {
+                "enabled": true,
+                "activation": 0.5,
+                "step": 0.1
+            }
+        }
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "logs/trading.log",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    }
+} 

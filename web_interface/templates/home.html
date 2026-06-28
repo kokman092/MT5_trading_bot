@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Trading Bot - Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="text-center py-5">
+        <h1 class="display-4 mb-3">Professional Trading Bot for MT5</h1>
+        <p class="lead mb-4">Advanced algorithmic trading with risk management, backtesting, and real-time analytics</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="#pricing" class="btn btn-primary btn-lg">View Pricing</a>
+            <a href="{{ url_for('documentation') }}" class="btn btn-outline-primary btn-lg">Documentation</a>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row py-5">
+        <div class="col-md-4 mb-4">
+            <div class="text-center">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                <h3>Risk Management</h3>
+                <p>Advanced position sizing, stop-loss calculation, and margin monitoring to protect your capital</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="text-center">
+                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                <h3>Technical Analysis</h3>
+                <p>Multiple technical indicators and custom strategy support for informed trading decisions</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="text-center">
+                <i class="fas fa-tachometer-alt fa-3x text-primary mb-3"></i>
+                <h3>Performance Analytics</h3>
+                <p>Real-time monitoring and detailed performance metrics to optimize your strategies</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div id="pricing" class="py-5">
+        <h2 class="text-center mb-5">Choose Your Plan</h2>
+        <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+            {% for tier, plan in pricing.items() %}
+            <div class="col">
+                <div class="card mb-4 rounded-3 shadow-sm {% if tier == 'pro' %}border-primary{% endif %}">
+                    <div class="card-header py-3 {% if tier == 'pro' %}text-bg-primary border-primary{% endif %}">
+                        <h4 class="my-0 fw-normal">{{ tier|title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="card-title pricing-card-title">
+                            ${{ "%.2f"|format(plan.monthly) }}
+                            <small class="text-body-secondary fw-light">/mo</small>
+                        </h1>
+                        <small class="text-body-secondary">
+                            or ${{ "%.2f"|format(plan.annual/12) }}/mo billed annually
+                            {% set savings = ((1 - plan.annual/(plan.monthly*12)) * 100)|round %}
+                            {% if savings > 0 %}
+                            <span class="badge bg-success">Save {{ savings }}%</span>
+                            {% endif %}
+                        </small>
+                        <ul class="list-unstyled mt-3 mb-4">
+                            {% for feature in plan.features %}
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                {{ feature }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <a href="{{ url_for('purchase', tier=tier) }}" 
+                           class="w-100 btn {% if tier == 'pro' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-lg">
+                            Get Started
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">What Our Users Say</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="card-text">"The risk management features have completely transformed how I trade. My win rate has improved significantly."</p>
+                            <footer class="blockquote-footer mt-3">John D., Professional Trader</footer>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="card-text">"The backtesting capabilities are incredible. I can validate my strategies before risking real capital."</p>
+                            <footer class="blockquote-footer mt-3">Sarah M., Algo Trader</footer>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                            </div>
+                            <p class="card-text">"The support team is amazing. They helped me set up custom strategies for my specific needs."</p>
+                            <footer class="blockquote-footer mt-3">Michael R., Investment Manager</footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center py-5">
+        <h2 class="mb-4">Ready to Start Trading?</h2>
+        <p class="lead mb-4">Join thousands of successful traders using our bot</p>
+        <a href="#pricing" class="btn btn-primary btn-lg px-5">Get Started Now</a>
+    </div>
+</div>
+{% endblock %}

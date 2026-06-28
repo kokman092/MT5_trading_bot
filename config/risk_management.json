@@ -1,0 +1,64 @@
+{
+    "max_risk_per_trade": 0.02,
+    "max_daily_loss": 0.05,
+    "max_open_positions": 3,
+    "position_sizing": {
+        "method": "risk_based",
+        "risk_percent": 0.02,
+        "max_position_size": 1.0
+    },
+    "stop_loss": {
+        "method": "atr_based",
+        "atr_multiplier": 1.5,
+        "min_pips": 10,
+        "max_pips": 50
+    },
+    "take_profit": {
+        "method": "risk_reward",
+        "risk_reward_ratio": 2.0,
+        "min_pips": 20,
+        "max_pips": 100
+    },
+    "filters": {
+        "max_spread_pips": 3.0,
+        "min_volatility_pips": 5.0,
+        "max_volatility_pips": 50.0,
+        "min_volume": 100,
+        "max_slippage_pips": 2.0
+    },
+    "risk_limits": {
+        "max_daily_loss_percent": 1.0,
+        "max_positions": 3,
+        "max_position_size": 0.1,
+        "risk_per_trade": 0.01,
+        "max_total_exposure": 0.15,
+        "max_correlation": 0.7,
+        "max_drawdown": 5.0
+    },
+    "volatility_filters": {
+        "min_atr": 15,
+        "max_atr": 80,
+        "max_spread_to_atr": 0.15,
+        "min_daily_range": 30,
+        "max_daily_range": 150
+    },
+    "session_filters": {
+        "london_session": {
+            "start": "08:00",
+            "end": "16:00",
+            "timezone": "Europe/London"
+        },
+        "new_york_session": {
+            "start": "13:00",
+            "end": "21:00",
+            "timezone": "America/New_York"
+        }
+    },
+    "position_management": {
+        "use_trailing_stop": true,
+        "trailing_stop_activation": 1.5,
+        "breakeven_activation": 1.0,
+        "partial_tp_level": 1.2,
+        "partial_tp_size": 0.5
+    }
+} 

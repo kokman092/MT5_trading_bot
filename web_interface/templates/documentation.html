@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="#getting-started" class="list-group-item list-group-item-action">Getting Started</a>
+                <a href="#installation" class="list-group-item list-group-item-action">Installation</a>
+                <a href="#configuration" class="list-group-item list-group-item-action">Configuration</a>
+                <a href="#trading" class="list-group-item list-group-item-action">Trading Features</a>
+                <a href="#risk-management" class="list-group-item list-group-item-action">Risk Management</a>
+                <a href="#api" class="list-group-item list-group-item-action">API Reference</a>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <section id="getting-started" class="mb-5">
+                <h2>Getting Started</h2>
+                <p>Welcome to the Trading Bot documentation. This guide will help you set up and use the trading bot effectively.</p>
+                
+                <h3>System Requirements</h3>
+                <ul>
+                    <li>Windows 10 or later</li>
+                    <li>MetaTrader 5 Platform</li>
+                    <li>Python 3.8 or later</li>
+                    <li>Active MT5 trading account</li>
+                </ul>
+            </section>
+
+            <section id="installation" class="mb-5">
+                <h2>Installation</h2>
+                <pre><code>git clone [repository-url]
+cd trading-bot
+pip install -r requirements.txt</code></pre>
+                
+                <h3>License Activation</h3>
+                <p>After purchase, you'll receive a license key. Add it to your config.json file:</p>
+                <pre><code>{
+    "license_key": "your-license-key-here"
+}</code></pre>
+            </section>
+
+            <section id="configuration" class="mb-5">
+                <h2>Configuration</h2>
+                <p>Configure your trading parameters in config.json:</p>
+                <ul>
+                    <li>MT5 account credentials</li>
+                    <li>Risk management settings</li>
+                    <li>Trading parameters</li>
+                    <li>Technical indicators</li>
+                </ul>
+            </section>
+
+            <section id="trading" class="mb-5">
+                <h2>Trading Features</h2>
+                <h3>Basic Features (Free Tier)</h3>
+                <ul>
+                    <li>Paper trading</li>
+                    <li>Basic technical indicators</li>
+                    <li>Up to 3 symbols</li>
+                    <li>Performance monitoring</li>
+                </ul>
+
+                <h3>Pro Features</h3>
+                <ul>
+                    <li>Live trading</li>
+                    <li>Advanced analytics</li>
+                    <li>Up to 10 symbols</li>
+                    <li>Email alerts</li>
+                    <li>Custom strategies</li>
+                </ul>
+
+                <h3>Enterprise Features</h3>
+                <ul>
+                    <li>All Pro features</li>
+                    <li>Priority support</li>
+                    <li>API access</li>
+                    <li>Custom integrations</li>
+                    <li>Up to 30 symbols</li>
+                </ul>
+            </section>
+
+            <section id="risk-management" class="mb-5">
+                <h2>Risk Management</h2>
+                <ul>
+                    <li>Maximum 10% of balance per trade</li>
+                    <li>Position size validation</li>
+                    <li>Stop-loss calculation</li>
+                    <li>Margin level monitoring (min 150%)</li>
+                    <li>Market hours validation</li>
+                </ul>
+            </section>
+
+            <section id="api" class="mb-5">
+                <h2>API Reference</h2>
+                <p>Enterprise users can access our REST API for custom integrations:</p>
+                <pre><code>GET /api/v1/account/status
+GET /api/v1/positions
+POST /api/v1/orders
+GET /api/v1/performance</code></pre>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

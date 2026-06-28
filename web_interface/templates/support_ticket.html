@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Support Ticket{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Create Support Ticket</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="license_key" class="form-label">License Key</label>
+                        <input type="text" class="form-control" id="license_key" name="license_key" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="subject" name="subject" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required></textarea>
+                        <div class="form-text">
+                            Please provide as much detail as possible about your issue.
+                            Include any error messages, steps to reproduce, and relevant screenshots.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" id="priority" name="priority">
+                            <option value="low">Low - General question or feedback</option>
+                            <option value="medium">Medium - Issue affecting functionality</option>
+                            <option value="high">High - Critical trading issue</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h4 class="mb-0">Support Response Times</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>License Tier</th>
+                                <th>Response Time</th>
+                                <th>Support Hours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic</td>
+                                <td>Within 48 hours</td>
+                                <td>9-5 EST, Mon-Fri</td>
+                            </tr>
+                            <tr>
+                                <td>Pro</td>
+                                <td>Within 24 hours</td>
+                                <td>9-5 EST, Mon-Sat</td>
+                            </tr>
+                            <tr>
+                                <td>Enterprise</td>
+                                <td>Within 4 hours</td>
+                                <td>24/7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

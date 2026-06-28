@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview">
+                            <i class="fas fa-home me-2"></i>
+                            Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#positions">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Positions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#settings">
+                            <i class="fas fa-cog me-2"></i>
+                            Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#support">
+                            <i class="fas fa-headset me-2"></i>
+                            Support
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <!-- Welcome Section -->
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Welcome back, {{ user.name }}!</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                        <i class="fas fa-calendar me-1"></i>
+                        This week
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-chart-pie fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">Win Rate</h6>
+                                    <h2 class="mb-0">{{ stats.win_rate }}%</h2>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Based on {{ stats.total_trades }} total trades</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-coins fa-2x text-warning"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">Profit Factor</h6>
+                                    <h2 class="mb-0">{{ stats.profit_factor }}</h2>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Ratio of gross profit to gross loss</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="card-title mb-0">Total Pips</h6>
+                                    <h2 class="mb-0">{{ stats.total_pips }}</h2>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">Net pips gained across all trades</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Performance Overview</h5>
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Active Positions -->
+            <h3 class="mb-3">Active Positions ({{ stats.active_positions }})</h3>
+            <div class="table-responsive mb-4">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Entry Price</th>
+                            <th>Current Price</th>
+                            <th>Profit/Loss</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>EURUSD</td>
+                            <td><span class="badge bg-success">Buy</span></td>
+                            <td>1.2150</td>
+                            <td>1.2180</td>
+                            <td class="text-success">+30 pips</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger">Close</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>GBPUSD</td>
+                            <td><span class="badge bg-danger">Sell</span></td>
+                            <td>1.3850</td>
+                            <td>1.3830</td>
+                            <td class="text-success">+20 pips</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger">Close</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Risk Management -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Risk Management</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Risk per Trade</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" value="1" min="0.1" max="5" step="0.1">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Max Open Positions</label>
+                                <input type="number" class="form-control" value="5" min="1" max="10">
+                            </div>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Account Status</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Subscription Plan</label>
+                                <input type="text" class="form-control" value="{{ user.subscription or 'Free Trial' }}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">License Key</label>
+                                <input type="text" class="form-control" value="{{ user.license_key or 'Not activated' }}" readonly>
+                            </div>
+                            {% if not user.subscription %}
+                            <a href="{{ url_for('pricing') }}" class="btn btn-success">Upgrade Plan</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Performance Chart
+const ctx = document.getElementById('performanceChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Account Balance',
+            data: [10000, 10500, 11200, 10800, 11500, 12000],
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Account Balance History'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

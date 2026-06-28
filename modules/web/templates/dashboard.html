@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Trading Bot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.css">
+{% endblock %}
+
+{% block content %}
+<div id="tradingDashboard">
+    <!-- Connection Status -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Trading Dashboard</h2>
+        <div id="connectionStatus" class="d-flex align-items-center">
+            <i class="fas fa-circle text-danger me-2"></i> Disconnected
+        </div>
+    </div>
+
+    <!-- Alerts Container -->
+    <div class="alerts-container"></div>
+
+    <!-- Trading Stats -->
+    <div class="row trading-stats">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" id="accountBalance">{{ account_info.balance|default('0.00', true)|format_currency }}</div>
+                <div class="stat-label">Balance</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" id="accountEquity">{{ account_info.equity|default('0.00', true)|format_currency }}</div>
+                <div class="stat-label">Equity</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" id="dailyPL">{{ daily_pl|default('0.00', true)|format_currency }}</div>
+                <div class="stat-label">Daily P/L</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-value" id="openPositions">{{ positions|length }}</div>
+                <div class="stat-label">Open Positions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading Controls -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="trading-controls">
+                <h4 class="mb-3">Trading Controls</h4>
+                <button id="startTradingBtn" class="btn btn-success btn-trading" onclick="startTrading()">
+                    <i class="fas fa-play me-2"></i>Start Trading
+                </button>
+                <button id="stopTradingBtn" class="btn btn-danger btn-trading" onclick="stopTrading()" disabled>
+                    <i class="fas fa-stop me-2"></i>Stop Trading
+                </button>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="chart-container">
+                <h4 class="mb-3">Account Performance</h4>
+                <div id="equityChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Analysis -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h4 class="mb-3">Market Analysis</h4>
+                <div id="marketAnalysisChart"></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h4 class="mb-3">Trading Signals</h4>
+                <div id="tradingSignalsChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Open Positions -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Open Positions</h4>
+            <button class="btn btn-sm btn-outline-danger" onclick="closeAllPositions()" id="closeAllBtn" disabled>
+                Close All Positions
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="positionsTable">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Volume</th>
+                            <th>Entry Price</th>
+                            <th>Current Price</th>
+                            <th>Profit/Loss</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for position in positions %}
+                        <tr>
+                            <td>{{ position.symbol }}</td>
+                            <td>{{ position.type }}</td>
+                            <td>{{ position.volume }}</td>
+                            <td>{{ position.entry_price|format_currency }}</td>
+                            <td>{{ position.current_price|format_currency }}</td>
+                            <td class="{{ 'text-success' if position.profit >= 0 else 'text-danger' }}">
+                                {{ position.profit|format_currency }}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="closePosition('{{ position.ticket }}')">
+                                    Close
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trading History -->
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Trading History</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date/Time</th>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Volume</th>
+                            <th>Entry Price</th>
+                            <th>Exit Price</th>
+                            <th>Profit/Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trade in trading_history %}
+                        <tr>
+                            <td>{{ trade.time }}</td>
+                            <td>{{ trade.symbol }}</td>
+                            <td>{{ trade.type }}</td>
+                            <td>{{ trade.volume }}</td>
+                            <td>{{ trade.entry_price|format_currency }}</td>
+                            <td>{{ trade.exit_price|format_currency }}</td>
+                            <td class="{{ 'text-success' if trade.profit >= 0 else 'text-danger' }}">
+                                {{ trade.profit|format_currency }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.js"></script>
+<script>
+// Initialize charts when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Equity Chart
+    const equityChartOptions = {
+        series: [{
+            name: 'Equity',
+            data: {{ equity_history|tojson|safe if equity_history else '[]' }}
+        }],
+        chart: {
+            type: 'area',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return '$' + value.toFixed(2);
+                }
+            }
+        },
+        tooltip: {
+            x: {
+                format: 'dd MMM yyyy HH:mm'
+            }
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const equityChart = new ApexCharts(document.querySelector('#equityChart'), equityChartOptions);
+    equityChart.render();
+    
+    // Market Analysis Chart
+    const marketAnalysisChartOptions = {
+        series: [{
+            name: 'Price',
+            data: {{ market_data|tojson|safe if market_data else '[]' }}
+        }],
+        chart: {
+            type: 'candlestick',
+            height: 350
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        yaxis: {
+            tooltip: {
+                enabled: true
+            }
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const marketAnalysisChart = new ApexCharts(document.querySelector('#marketAnalysisChart'), marketAnalysisChartOptions);
+    marketAnalysisChart.render();
+    
+    // Trading Signals Chart
+    const tradingSignalsChartOptions = {
+        series: [{
+            name: 'Buy Signals',
+            data: {{ buy_signals|tojson|safe if buy_signals else '[]' }}
+        }, {
+            name: 'Sell Signals',
+            data: {{ sell_signals|tojson|safe if sell_signals else '[]' }}
+        }],
+        chart: {
+            type: 'scatter',
+            height: 350
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return '$' + value.toFixed(2);
+                }
+            }
+        },
+        markers: {
+            size: 6,
+            strokeWidth: 0
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const tradingSignalsChart = new ApexCharts(document.querySelector('#tradingSignalsChart'), tradingSignalsChartOptions);
+    tradingSignalsChart.render();
+    
+    // Update charts when dark mode changes
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        const theme = { mode: isDarkMode ? 'dark' : 'light' };
+        
+        equityChart.updateOptions({ theme });
+        marketAnalysisChart.updateOptions({ theme });
+        tradingSignalsChart.updateOptions({ theme });
+    });
+});
+
+// Enable/disable close all button based on open positions
+function updateCloseAllButton() {
+    const closeAllBtn = document.getElementById('closeAllBtn');
+    const hasPositions = document.querySelector('#positionsTable tbody tr') !== null;
+    if (closeAllBtn) {
+        closeAllBtn.disabled = !hasPositions;
+    }
+}
+
+// Close all positions
+function closeAllPositions() {
+    if (!confirm('Are you sure you want to close all positions?')) return;
+    
+    const positions = document.querySelectorAll('#positionsTable tbody tr');
+    positions.forEach(position => {
+        const ticket = position.querySelector('button').getAttribute('onclick').match(/'([^']+)'/)[1];
+        closePosition(ticket);
+    });
+}
+
+// Close single position
+function closePosition(ticket) {
+    fetch(`/api/position/close`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ticket })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Position ${ticket} closed successfully`);
+        } else {
+            showAlert('danger', `Failed to close position: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Failed to close position');
+    });
+}
+
+// Update charts with new data
+function updateCharts(data) {
+    if (data.equity) {
+        equityChart.updateSeries([{
+            data: data.equity
+        }]);
+    }
+    
+    if (data.market) {
+        marketAnalysisChart.updateSeries([{
+            data: data.market
+        }]);
+    }
+    
+    if (data.signals) {
+        tradingSignalsChart.updateSeries([
+            { data: data.signals.buy },
+            { data: data.signals.sell }
+        ]);
+    }
+}
+</script>
+{% endblock %} 

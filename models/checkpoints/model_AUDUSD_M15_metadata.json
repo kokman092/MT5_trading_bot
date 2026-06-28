@@ -1,0 +1,10 @@
+{
+    "symbol": "AUDUSD",
+    "timeframe": "M15",
+    "training_history": {
+        "accuracy": 0.4989979863166809,
+        "val_accuracy": 0.49949899315834045,
+        "loss": 0.6967863440513611,
+        "val_loss": 0.6942459344863892
+    }
+}

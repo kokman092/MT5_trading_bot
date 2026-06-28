@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Create Account</h2>
+                    
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="form-text">We'll never share your email with anyone else.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms and Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terms and Conditions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Trading Risks</h6>
+                <p>Trading foreign exchange and other financial instruments carries a high level of risk and may not be suitable for all investors. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite.</p>
+                
+                <h6>2. License Terms</h6>
+                <p>The trading bot is licensed, not sold. Your license gives you the right to use the bot according to your subscription plan. You may not copy, modify, or distribute the bot's code.</p>
+                
+                <h6>3. Performance</h6>
+                <p>Past performance is not indicative of future results. No representation is being made that any account will or is likely to achieve profits or losses similar to those discussed on this website.</p>
+                
+                <h6>4. Technical Requirements</h6>
+                <p>You are responsible for maintaining a stable internet connection and ensuring your MetaTrader 5 platform is properly configured. We are not responsible for losses due to technical issues on your end.</p>
+                
+                <h6>5. Support</h6>
+                <p>Support response times vary by subscription tier. While we strive to help all users, priority is given to higher-tier subscribers.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Password validation
+const password = document.getElementById('password');
+const confirm_password = document.getElementById('confirm_password');
+
+function validatePassword() {
+    if (password.value !== confirm_password.value) {
+        confirm_password.setCustomValidity("Passwords don't match");
+    } else {
+        confirm_password.setCustomValidity('');
+    }
+}
+
+password.onchange = validatePassword;
+confirm_password.onkeyup = validatePassword;
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Backtest - Trading Bot{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.css">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Backtest Configuration -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Backtest Configuration</h4>
+            </div>
+            <div class="card-body">
+                <form id="backtestForm" onsubmit="return runBacktest(event)">
+                    <!-- Symbol Selection -->
+                    <div class="mb-3">
+                        <label for="symbol" class="form-label">Symbol</label>
+                        <select class="form-select" id="symbol" name="symbol" required>
+                            <option value="">Select a symbol</option>
+                            {% for symbol in symbols %}
+                            <option value="{{ symbol }}">{{ symbol }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Timeframe Selection -->
+                    <div class="mb-3">
+                        <label for="timeframe" class="form-label">Timeframe</label>
+                        <select class="form-select" id="timeframe" name="timeframe" required>
+                            <option value="">Select a timeframe</option>
+                            <option value="M1">1 Minute</option>
+                            <option value="M5">5 Minutes</option>
+                            <option value="M15">15 Minutes</option>
+                            <option value="M30">30 Minutes</option>
+                            <option value="H1">1 Hour</option>
+                            <option value="H4">4 Hours</option>
+                            <option value="D1">1 Day</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="mb-3">
+                        <label for="dateRange" class="form-label">Date Range</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-calendar"></i>
+                            </span>
+                            <input type="text" class="form-control" id="dateRange" name="dateRange" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Initial Balance -->
+                    <div class="mb-3">
+                        <label for="initialBalance" class="form-label">Initial Balance</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="initialBalance" name="initialBalance" 
+                                   min="100" step="100" value="10000" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Settings -->
+                    <div class="mb-3">
+                        <label for="riskPerTrade" class="form-label">Risk Per Trade (%)</label>
+                        <input type="range" class="form-range" id="riskPerTrade" name="riskPerTrade" 
+                               min="0.1" max="5" step="0.1" value="1">
+                        <div class="text-center" id="riskValue">1%</div>
+                    </div>
+                    
+                    <!-- Strategy Settings -->
+                    <div class="mb-3">
+                        <label class="form-label">Strategy Parameters</label>
+                        <div class="accordion" id="strategyAccordion">
+                            <!-- Technical Indicators -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#technicalIndicators">
+                                        Technical Indicators
+                                    </button>
+                                </h2>
+                                <div id="technicalIndicators" class="accordion-collapse collapse" 
+                                     data-bs-parent="#strategyAccordion">
+                                    <div class="accordion-body">
+                                        <!-- Moving Averages -->
+                                        <div class="mb-2">
+                                            <label class="form-label">Moving Averages</label>
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">Fast MA</span>
+                                                <input type="number" class="form-control" name="fastMA" value="10" min="1">
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Slow MA</span>
+                                                <input type="number" class="form-control" name="slowMA" value="20" min="1">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- RSI -->
+                                        <div class="mb-2">
+                                            <label class="form-label">RSI</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Period</span>
+                                                <input type="number" class="form-control" name="rsiPeriod" value="14" min="1">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- MACD -->
+                                        <div class="mb-2">
+                                            <label class="form-label">MACD</label>
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">Fast</span>
+                                                <input type="number" class="form-control" name="macdFast" value="12" min="1">
+                                            </div>
+                                            <div class="input-group mb-2">
+                                                <span class="input-group-text">Slow</span>
+                                                <input type="number" class="form-control" name="macdSlow" value="26" min="1">
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Signal</span>
+                                                <input type="number" class="form-control" name="macdSignal" value="9" min="1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Position Management -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#positionManagement">
+                                        Position Management
+                                    </button>
+                                </h2>
+                                <div id="positionManagement" class="accordion-collapse collapse" 
+                                     data-bs-parent="#strategyAccordion">
+                                    <div class="accordion-body">
+                                        <!-- Take Profit -->
+                                        <div class="mb-2">
+                                            <label class="form-label">Take Profit (pips)</label>
+                                            <input type="number" class="form-control" name="takeProfit" value="50" min="1">
+                                        </div>
+                                        
+                                        <!-- Stop Loss -->
+                                        <div class="mb-2">
+                                            <label class="form-label">Stop Loss (pips)</label>
+                                            <input type="number" class="form-control" name="stopLoss" value="30" min="1">
+                                        </div>
+                                        
+                                        <!-- Trailing Stop -->
+                                        <div class="form-check mb-2">
+                                            <input type="checkbox" class="form-check-input" id="useTrailingStop" 
+                                                   name="useTrailingStop">
+                                            <label class="form-check-label" for="useTrailingStop">
+                                                Use Trailing Stop
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-2" id="trailingStopSettings" style="display: none;">
+                                            <label class="form-label">Trailing Stop Distance (pips)</label>
+                                            <input type="number" class="form-control" name="trailingStop" value="20" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary" id="runBacktestBtn">
+                            <i class="fas fa-play me-2"></i>Run Backtest
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backtest Results -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Backtest Results</h4>
+            </div>
+            <div class="card-body">
+                <!-- Loading Spinner -->
+                <div class="spinner-container" id="loadingSpinner" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                
+                <!-- Results Content -->
+                <div id="resultsContent" style="display: none;">
+                    <!-- Performance Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalReturn">0.00%</div>
+                                <div class="stat-label">Total Return</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value" id="winRate">0.00%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value" id="profitFactor">0.00</div>
+                                <div class="stat-label">Profit Factor</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="stat-value" id="maxDrawdown">0.00%</div>
+                                <div class="stat-label">Max Drawdown</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="chart-container mb-4">
+                        <h5>Equity Curve</h5>
+                        <div id="equityChart"></div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5>Monthly Returns</h5>
+                                <div id="monthlyReturnsChart"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <h5>Drawdown</h5>
+                                <div id="drawdownChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Trade List -->
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="tradeList">
+                            <thead>
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Type</th>
+                                    <th>Entry Price</th>
+                                    <th>Exit Price</th>
+                                    <th>Profit/Loss</th>
+                                    <th>Return</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize date range picker
+    flatpickr('#dateRange', {
+        mode: 'range',
+        dateFormat: 'Y-m-d',
+        maxDate: 'today',
+        defaultDate: [
+            new Date().setMonth(new Date().getMonth() - 1),
+            new Date()
+        ]
+    });
+    
+    // Update risk value display
+    const riskSlider = document.getElementById('riskPerTrade');
+    const riskValue = document.getElementById('riskValue');
+    riskSlider.addEventListener('input', () => {
+        riskValue.textContent = `${riskSlider.value}%`;
+    });
+    
+    // Toggle trailing stop settings
+    const useTrailingStop = document.getElementById('useTrailingStop');
+    const trailingStopSettings = document.getElementById('trailingStopSettings');
+    useTrailingStop.addEventListener('change', () => {
+        trailingStopSettings.style.display = useTrailingStop.checked ? 'block' : 'none';
+    });
+});
+
+// Run backtest
+function runBacktest(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Show loading spinner
+    document.getElementById('loadingSpinner').style.display = 'flex';
+    document.getElementById('resultsContent').style.display = 'none';
+    
+    // Run backtest
+    fetch('/api/backtest', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            displayResults(result.data);
+        } else {
+            showAlert('danger', `Backtest failed: ${result.error}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Failed to run backtest');
+    })
+    .finally(() => {
+        document.getElementById('loadingSpinner').style.display = 'none';
+    });
+    
+    return false;
+}
+
+// Display backtest results
+function displayResults(data) {
+    // Update metrics
+    document.getElementById('totalReturn').textContent = `${data.metrics.total_return.toFixed(2)}%`;
+    document.getElementById('winRate').textContent = `${data.metrics.win_rate.toFixed(2)}%`;
+    document.getElementById('profitFactor').textContent = data.metrics.profit_factor.toFixed(2);
+    document.getElementById('maxDrawdown').textContent = `${data.metrics.max_drawdown.toFixed(2)}%`;
+    
+    // Initialize charts
+    initializeEquityChart(data.equity_curve);
+    initializeMonthlyReturnsChart(data.monthly_returns);
+    initializeDrawdownChart(data.drawdown);
+    
+    // Populate trade list
+    const tradeList = document.getElementById('tradeList').querySelector('tbody');
+    tradeList.innerHTML = '';
+    
+    data.trades.forEach(trade => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${new Date(trade.time).toLocaleString()}</td>
+            <td>${trade.type}</td>
+            <td>${formatCurrency(trade.entry_price)}</td>
+            <td>${formatCurrency(trade.exit_price)}</td>
+            <td class="${trade.profit >= 0 ? 'text-success' : 'text-danger'}">
+                ${formatCurrency(trade.profit)}
+            </td>
+            <td class="${trade.profit >= 0 ? 'text-success' : 'text-danger'}">
+                ${(trade.return * 100).toFixed(2)}%
+            </td>
+        `;
+        tradeList.appendChild(row);
+    });
+    
+    // Show results
+    document.getElementById('resultsContent').style.display = 'block';
+}
+
+// Initialize equity chart
+function initializeEquityChart(data) {
+    const options = {
+        series: [{
+            name: 'Equity',
+            data: data
+        }],
+        chart: {
+            type: 'area',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return '$' + value.toFixed(2);
+                }
+            }
+        },
+        tooltip: {
+            x: {
+                format: 'dd MMM yyyy HH:mm'
+            }
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const chart = new ApexCharts(document.querySelector('#equityChart'), options);
+    chart.render();
+}
+
+// Initialize monthly returns chart
+function initializeMonthlyReturnsChart(data) {
+    const options = {
+        series: [{
+            name: 'Monthly Return',
+            data: data
+        }],
+        chart: {
+            type: 'bar',
+            height: 350
+        },
+        plotOptions: {
+            bar: {
+                colors: {
+                    ranges: [{
+                        from: -100,
+                        to: 0,
+                        color: '#dc3545'
+                    }, {
+                        from: 0,
+                        to: 100,
+                        color: '#28a745'
+                    }]
+                }
+            }
+        },
+        xaxis: {
+            type: 'category'
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return value.toFixed(2) + '%';
+                }
+            }
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const chart = new ApexCharts(document.querySelector('#monthlyReturnsChart'), options);
+    chart.render();
+}
+
+// Initialize drawdown chart
+function initializeDrawdownChart(data) {
+    const options = {
+        series: [{
+            name: 'Drawdown',
+            data: data
+        }],
+        chart: {
+            type: 'area',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        xaxis: {
+            type: 'datetime'
+        },
+        yaxis: {
+            labels: {
+                formatter: function(value) {
+                    return value.toFixed(2) + '%';
+                }
+            },
+            reversed: true
+        },
+        tooltip: {
+            x: {
+                format: 'dd MMM yyyy HH:mm'
+            }
+        },
+        theme: {
+            mode: localStorage.getItem('darkMode') === 'true' ? 'dark' : 'light'
+        }
+    };
+    
+    const chart = new ApexCharts(document.querySelector('#drawdownChart'), options);
+    chart.render();
+}
+
+// Format currency
+function formatCurrency(value) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(value);
+}
+</script>
+{% endblock %} 

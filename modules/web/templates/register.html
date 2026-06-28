@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Trading Bot{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="text-center mb-4">Create Account</h2>
+    
+    <form method="POST" action="{{ url_for('register') }}" id="registerForm" onsubmit="return validateForm('registerForm')">
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-user"></i>
+                </span>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="invalid-feedback">Please enter your full name.</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-envelope"></i>
+                </span>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="invalid-feedback">Please enter a valid email address.</div>
+            <div class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" class="form-control" id="password" name="password" 
+                       pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div class="invalid-feedback">
+                Password must be at least 8 characters long and include letters, numbers, and special characters.
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-lock"></i>
+                </span>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            <div class="invalid-feedback">Passwords do not match.</div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="timezone" class="form-label">Timezone</label>
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i class="fas fa-globe"></i>
+                </span>
+                <select class="form-select" id="timezone" name="timezone" required>
+                    <option value="">Select your timezone</option>
+                    <!-- Timezone options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="invalid-feedback">Please select your timezone.</div>
+        </div>
+        
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
+            <label class="form-check-label" for="terms">
+                I agree to the <a href="{{ url_for('terms') }}" target="_blank">Terms and Conditions</a>
+            </label>
+            <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Register
+            </button>
+        </div>
+    </form>
+    
+    <div class="text-center mt-4">
+        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Populate timezone select
+    const timezoneSelect = document.getElementById('timezone');
+    const timezones = moment.tz.names();
+    const userTimezone = moment.tz.guess();
+    
+    timezones.forEach(timezone => {
+        const option = document.createElement('option');
+        option.value = timezone;
+        option.text = `${timezone} (${moment.tz(timezone).format('Z')})`;
+        option.selected = timezone === userTimezone;
+        timezoneSelect.appendChild(option);
+    });
+    
+    // Toggle password visibility
+    function setupPasswordToggle(inputId, toggleId) {
+        const input = document.getElementById(inputId);
+        const toggle = document.getElementById(toggleId);
+        
+        toggle.addEventListener('click', () => {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            toggle.querySelector('i').className = `fas fa-${type === 'password' ? 'eye' : 'eye-slash'}`;
+        });
+    }
+    
+    setupPasswordToggle('password', 'togglePassword');
+    setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+    
+    // Password validation
+    const form = document.getElementById('registerForm');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    function validatePasswords() {
+        if (confirmPassword.value && password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+    
+    // Password strength indicator
+    password.addEventListener('input', () => {
+        const value = password.value;
+        const strength = {
+            length: value.length >= 8,
+            lowercase: /[a-z]/.test(value),
+            uppercase: /[A-Z]/.test(value),
+            number: /\d/.test(value),
+            special: /[@$!%*#?&]/.test(value)
+        };
+        
+        const strengthBar = document.createElement('div');
+        strengthBar.className = 'progress mt-2';
+        strengthBar.style.height = '5px';
+        
+        const strengthIndicator = document.createElement('div');
+        strengthIndicator.className = 'progress-bar';
+        strengthIndicator.style.width = `${Object.values(strength).filter(Boolean).length * 20}%`;
+        
+        if (Object.values(strength).every(Boolean)) {
+            strengthIndicator.className += ' bg-success';
+        } else if (Object.values(strength).filter(Boolean).length >= 3) {
+            strengthIndicator.className += ' bg-warning';
+        } else {
+            strengthIndicator.className += ' bg-danger';
+        }
+        
+        strengthBar.appendChild(strengthIndicator);
+        
+        const existingBar = password.parentElement.nextElementSibling;
+        if (existingBar && existingBar.classList.contains('progress')) {
+            existingBar.replaceWith(strengthBar);
+        } else {
+            password.parentElement.after(strengthBar);
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', (event) => {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+    
+    // Clear validation state when input changes
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            input.classList.remove('is-invalid');
+        });
+    });
+});
+</script>
+{% endblock %} 
