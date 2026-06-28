@@ -98,7 +98,9 @@ class MLAnalyzer:
                     'max_depth': 5,
                     'learning_rate': 0.1,
                     'random_state': 42,
-                    'verbose': -1
+                    'verbose': -1,
+                    'verbosity': -1,
+                    'force_col_wise': True
                 }
             }
         }
@@ -128,9 +130,25 @@ class MLAnalyzer:
         
         # Symbol-specific parameters
         self.symbol_params = {}
+        for symbol in self.config['trading']['symbols']:
+            timeframes = self.config['trading']['timeframes']
+            for timeframe in timeframes:
+                symbol_tf = f"{symbol}_{timeframe}"
+                self.symbol_params[symbol_tf] = {
+                    'prediction_history': [],
+                    'accuracy': 0.0,
+                    'f1_score': 0.0,
+                    'precision': 0.0,
+                    'recall': 0.0,
+                    'last_training_time': None,
+                    'samples_since_training': 0,
+                    'correct_predictions': 0,
+                    'total_predictions': 0
+                }
         
         # Load existing models if available
         self._load_existing_models()
+        self._load_metrics_history()
         
     async def initialize(self) -> bool:
         """Initialize ML analyzer state"""
@@ -146,17 +164,23 @@ class MLAnalyzer:
                     
                     # Set up symbol parameters if not already present
                     if symbol_tf not in self.symbol_params:
-                        self.symbol_params[symbol_tf] = {
-                            'prediction_history': [],
-                            'accuracy': 0.0,
-                            'f1_score': 0.0,
-                            'precision': 0.0,
-                            'recall': 0.0,
-                            'last_training_time': None,
-                            'samples_since_training': 0,
-                            'correct_predictions': 0,
-                            'total_predictions': 0
-                        }
+                        self.symbol_params[symbol_tf] = {}
+                    
+                    # Ensure all default parameters exist
+                    defaults = {
+                        'prediction_history': [],
+                        'accuracy': 0.0,
+                        'f1_score': 0.0,
+                        'precision': 0.0,
+                        'recall': 0.0,
+                        'last_training_time': None,
+                        'samples_since_training': 0,
+                        'correct_predictions': 0,
+                        'total_predictions': 0
+                    }
+                    for key, val in defaults.items():
+                        if key not in self.symbol_params[symbol_tf]:
+                            self.symbol_params[symbol_tf][key] = val
             
             return True
             
@@ -313,8 +337,7 @@ class MLAnalyzer:
                 # Get selected feature indices and feature names from previous training
                 selector = self.feature_selectors[symbol_tf]
                 selected_indices = selector.get_support(indices=True)
-                original_features = [col for col in df.columns if col not in ['datetime', 'open', 'high', 'low', 'close', 'volume', 'target']]
-                selected_features = [original_features[i] for i in selected_indices if i < len(original_features)]
+                selected_features = [feature_cols[i] for i in selected_indices if i < len(feature_cols)]
                 feature_cols = selected_features
             
             # Record execution time
