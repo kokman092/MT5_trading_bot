@@ -260,7 +260,8 @@ class MLAnalyzer:
             df.columns = [re.sub(r'[ \t\n\r\f\v,:{}""\[\]]', '_', col) for col in df.columns]
             
             # Extract features and target
-            feature_cols = [col for col in df.columns if col not in ['datetime', 'open', 'high', 'low', 'close', 'volume', 'target']]
+            exclude_cols = ['datetime', 'time', 'open', 'high', 'low', 'close', 'volume', 'target', 'Unnamed_0', 'Unnamed__0']
+            feature_cols = [col for col in df.columns if col not in exclude_cols and 'Unnamed' not in col]
             
             if not feature_cols:
                 self.logger.error(f"No feature columns found in data for {symbol_tf}")
