@@ -290,7 +290,7 @@ class MLAnalyzer:
             df.columns = [re.sub(r'[ \t\n\r\f\v,:{}""\[\]]', '_', col) for col in df.columns]
             
             # Extract features and target
-            exclude_cols = ['datetime', 'time', 'open', 'high', 'low', 'close', 'volume', 'target', 'Unnamed_0', 'Unnamed__0']
+            exclude_cols = ['datetime', 'time', 'open', 'high', 'low', 'close', 'volume', 'target', 'symbol', 'Unnamed_0', 'Unnamed__0']
             feature_cols = sorted([col for col in df.columns if col not in exclude_cols and 'Unnamed' not in col])
             
             if not feature_cols:

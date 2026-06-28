@@ -163,14 +163,17 @@ class TradingBot:
                 return None
                 
             # Get the strongest technical signal
-            final_signal = max(technical_signals, key=lambda x: x.strength)
+            final_signal = max(technical_signals, key=lambda x: x.confidence)
             
-            # Adjust signal strength based on ML prediction
-            if ml_signals and ml_signals.get('direction') == final_signal.direction:
-                final_signal.strength *= (1 + ml_signals.get('confidence', 0))
-            else:
-                final_signal.strength *= 0.5
-                
+            # Adjust signal confidence based on ML prediction
+            new_confidence = final_signal.confidence
+            if ml_signals:
+                if ml_signals.get('direction') == final_signal.direction:
+                    new_confidence *= (1 + ml_signals.get('confidence', 0))
+                else:
+                    new_confidence *= 0.5
+            
+            final_signal.update_confidence(new_confidence)
             return final_signal
             
         except Exception as e:
