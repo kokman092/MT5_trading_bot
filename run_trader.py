@@ -806,6 +806,24 @@ class ProfessionalTradingSystem:
                 if 'partial_exit' not in exit_params:
                     exit_params['partial_exit'] = {'enabled': True, 'activation_threshold': 0.5, 'step': 0.2}
             
+            # Normalize trading timeframes config to be a flat list
+            trading_conf = config.setdefault('trading', {})
+            tfs = trading_conf.get('timeframes')
+            if isinstance(tfs, dict):
+                primary = tfs.get('primary')
+                secondary = tfs.get('secondary', [])
+                if isinstance(secondary, str):
+                    secondary = [secondary]
+                normalized_tfs = []
+                if primary:
+                    normalized_tfs.append(primary)
+                for tf in secondary:
+                    if tf not in normalized_tfs:
+                        normalized_tfs.append(tf)
+                trading_conf['timeframes'] = normalized_tfs
+            elif isinstance(tfs, str):
+                trading_conf['timeframes'] = [tfs]
+            
             # Ensure regime_detection thresholds exist for RegimeDetector
             regime_det = config.setdefault('regime_detection', {})
             thresholds = regime_det.setdefault('thresholds', {})
