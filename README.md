@@ -76,9 +76,25 @@ MT5_PASSWORD=your_password
 MT5_SERVER=your_server
 ```
 
-## Configuration
-
 The bot is highly configurable through `config/config.json`:
+
+### Selecting Symbols to Trade (e.g., Gold Only)
+To configure the symbols the bot is allowed to trade, modify the `"symbols"` array under the `"trading"` section inside [config/config.json](file:///e:/trading%20bot%20for%20MT5/config/config.json) (and [config/trading_config.json](file:///e:/trading%20bot%20for%20MT5/config/trading_config.json) if it is present):
+
+* **To only trade Gold (XAUUSD)**:
+  ```json
+  "trading": {
+      "symbols": ["XAUUSD"],
+      "timeframes": ["M5", "M15", "H1"]
+  }
+  ```
+* **To trade multiple currency pairs and gold**:
+  ```json
+  "trading": {
+      "symbols": ["EURUSD", "GBPUSD", "XAUUSD"],
+      "timeframes": ["M5", "M15", "H1"]
+  }
+  ```
 
 ### Market Analysis Settings
 ```json
