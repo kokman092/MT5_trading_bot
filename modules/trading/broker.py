@@ -81,10 +81,16 @@ class MT5Broker:
             # Fix for MT5 connection issues - ensure clean shutdown first
             mt5.shutdown()
             
-            if not mt5.initialize(
-                path=self.config.get('mt5_path', None),
-                timeout=self.config.get('mt5_account', {}).get('timeout', 60000)
-            ):
+            # Only pass path if it is explicitly configured and not None
+            mt5_path = self.config.get('mt5_path', None)
+            timeout_val = self.config.get('mt5_account', {}).get('timeout', 60000)
+            
+            if mt5_path:
+                success = mt5.initialize(path=str(mt5_path), timeout=timeout_val)
+            else:
+                success = mt5.initialize(timeout=timeout_val)
+                
+            if not success:
                 raise Exception(f"Failed to initialize MT5: {mt5.last_error()}")
                 
             # Login to MT5 account
