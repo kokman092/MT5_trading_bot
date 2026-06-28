@@ -1085,7 +1085,7 @@ class ProfessionalTradingSystem:
                 return False
                 
             # Check margin level
-            if account_info.margin_level < 200:  # 200% minimum
+            if account_info.margin > 0 and account_info.margin_level < 200:  # 200% minimum
                 logger.warning(f"Low margin level: {account_info.margin_level}%")
                 return False
                 

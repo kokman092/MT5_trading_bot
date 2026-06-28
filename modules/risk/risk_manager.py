@@ -380,7 +380,7 @@ class RiskManager:
             account_info = mt5.account_info()
             if account_info:
                 margin_level = account_info.margin_level
-                if margin_level < 150:  # Less than 150% margin level
+                if account_info.margin > 0 and margin_level < 150:  # Less than 150% margin level
                     health_status['issues'].append(f'Low margin level: {margin_level}%')
                     health_status['is_healthy'] = False
                     

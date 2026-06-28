@@ -235,7 +235,7 @@ def validate_trading_conditions() -> bool:
             return False
             
         # Check margin level (minimum 150%)
-        if account_info['margin_level'] < 150:
+        if account_info['margin'] > 0 and account_info['margin_level'] < 150:
             logging.warning(f"Insufficient margin level: {account_info['margin_level']}%")
             return False
             
