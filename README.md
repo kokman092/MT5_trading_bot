@@ -116,6 +116,8 @@ python run_trader.py
 3. View performance metrics in the web dashboard:
 ```bash
 python run_dashboard.py
+streamlit run run_dashboard.py
+
 ```
 
 ## Safety Features

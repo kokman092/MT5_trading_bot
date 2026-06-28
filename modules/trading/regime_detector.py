@@ -8,6 +8,11 @@ import logging
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+import warnings
+
+# Suppress hmmlearn non-convergence warnings and logging warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="hmmlearn")
+logging.getLogger("hmmlearn").setLevel(logging.ERROR)
 
 @dataclass
 class MarketRegime:

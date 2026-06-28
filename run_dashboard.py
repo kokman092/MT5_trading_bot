@@ -130,5 +130,13 @@ class TradingDashboard:
         status_cols[2].metric("Last Update", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
 if __name__ == "__main__":
-    dashboard = TradingDashboard()
-    dashboard.run() 
+    import sys
+    import subprocess
+    
+    if st.runtime.exists():
+        dashboard = TradingDashboard()
+        dashboard.run()
+    else:
+        # If run directly via python, automatically bootstrap using streamlit module
+        cmd = [sys.executable, "-m", "streamlit", "run", __file__]
+        subprocess.run(cmd) 
