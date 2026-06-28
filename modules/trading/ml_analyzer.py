@@ -234,6 +234,7 @@ class MLAnalyzer:
             if not self.models_dir.exists():
                 return
                 
+            loaded_count = 0
             # Load models for each symbol and timeframe
             for symbol in self.config['trading']['symbols']:
                 timeframes = self.config['trading']['timeframes']
@@ -257,9 +258,13 @@ class MLAnalyzer:
                                 
                             self.symbol_params[symbol_tf]['last_training_time'] = model_data.get('last_training_time')
                             
-                            self.logger.info(f"Loaded existing model for {symbol_tf}")
+                            self.logger.debug(f"Loaded existing model for {symbol_tf}")
+                            loaded_count += 1
                         except Exception as e:
                             self.logger.error(f"Error loading model for {symbol_tf}: {str(e)}")
+                            
+            if loaded_count > 0:
+                self.logger.info(f"Successfully loaded {loaded_count} existing machine learning models")
                             
         except Exception as e:
             self.logger.error(f"Error loading existing models: {str(e)}")

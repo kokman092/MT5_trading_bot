@@ -30,10 +30,6 @@ class MarketAnalyzer:
         self._last_update = {}
         self._initialize_indicators()
         
-        # Initialize ML analyzer
-        from .ml_analyzer import MLAnalyzer
-        self.ml_analyzer = MLAnalyzer(config)
-        
     def _initialize_indicators(self):
         """Initialize technical indicators"""
         self.indicators = {

@@ -1209,7 +1209,7 @@ class ProfessionalTradingSystem:
             for symbol, data in self.market_data_cache.items():
                 regime = self.regime_detector.detect_regime(data)
                 if regime:
-                    logger.info(f"Market regime for {symbol}: {regime.regime_type} "
+                    logger.debug(f"Market regime for {symbol}: {regime.regime_type} "
                               f"(confidence: {regime.confidence:.2f})")
                     
         except Exception as e:
