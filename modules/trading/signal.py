@@ -193,22 +193,40 @@ class Signal:
     def __post_init__(self):
         """Convert string enums to proper enum types"""
         if isinstance(self.direction, str):
-            self.direction = SignalDirection(self.direction.lower())
+            try:
+                self.direction = SignalDirection(self.direction.lower())
+            except ValueError:
+                pass
             
         if isinstance(self.timeframe, str):
-            self.timeframe = SignalTimeframe(self.timeframe.upper())
+            try:
+                self.timeframe = SignalTimeframe(self.timeframe.upper())
+            except ValueError:
+                pass
             
         if isinstance(self.order_type, str):
-            self.order_type = OrderType(self.order_type.lower())
+            try:
+                self.order_type = OrderType(self.order_type.lower())
+            except ValueError:
+                pass
             
         if isinstance(self.strength, str):
-            self.strength = SignalStrength(self.strength.lower())
+            try:
+                self.strength = SignalStrength(self.strength.lower())
+            except ValueError:
+                pass
             
         if isinstance(self.source, str):
-            self.source = SignalSource(self.source.lower())
+            try:
+                self.source = SignalSource(self.source.lower())
+            except ValueError:
+                pass
             
         if isinstance(self.strategy_type, str):
-            self.strategy_type = StrategyType(self.strategy_type.lower())
+            try:
+                self.strategy_type = StrategyType(self.strategy_type.lower())
+            except ValueError:
+                pass
         
         # Validate required fields
         self._validate()

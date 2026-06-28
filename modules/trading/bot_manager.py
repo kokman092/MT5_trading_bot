@@ -169,3 +169,13 @@ class BotManager:
             
         except Exception as e:
             self.logger.error(f"Error during shutdown: {str(e)}") 
+            
+    def cleanup(self):
+        """Synchronous cleanup wrapper of bot manager resources"""
+        try:
+            if self._task and not self._task.done():
+                self._task.cancel()
+            self._bot = None
+            self.logger.info("Bot manager cleanup complete")
+        except Exception as e:
+            self.logger.error(f"Error during bot manager cleanup: {str(e)}")
