@@ -139,6 +139,10 @@ class TradingBot:
         except Exception as e:
             self.logger.error(f"Error processing symbol {symbol}: {str(e)}")
             
+    async def process_symbol(self, symbol: str):
+        """Public method to process trading logic for a symbol"""
+        await self._process_symbol(symbol)
+            
     def _is_market_open(self, symbol: str) -> bool:
         """Check if market is open for trading"""
         try:

@@ -416,6 +416,9 @@ class ProfessionalTradingSystem:
             if not config:
                 return None
                 
+            # Normalize config schema mismatches
+            config = self._normalize_config(config)
+                
             # Validate professional configuration
             if not self._validate_professional_config(config):
                 return None
@@ -429,6 +432,45 @@ class ProfessionalTradingSystem:
         except Exception as e:
             logger.error(f"Error loading configuration: {str(e)}")
             return None
+            
+    def _normalize_config(self, config: dict) -> dict:
+        """Normalize fallback YAML configuration structures to canonical JSON schema"""
+        if 'risk_management' not in config:
+            config['risk_management'] = {}
+        
+        rm = config['risk_management']
+        
+        # Normalize daily loss
+        if 'max_daily_loss' not in rm:
+            rm['max_daily_loss'] = rm.get('emergency_stop', {}).get('max_daily_loss_percent', 0.03)
+            
+        # Normalize position size
+        if 'max_position_size' not in rm:
+            rm['max_position_size'] = rm.get('position_management', {}).get('volume_profile', {}).get('max_lots', 1.0)
+            
+        # Normalize position limits / max_positions
+        if 'position_limits' not in rm:
+            rm['position_limits'] = {
+                'max_positions': rm.get('emergency_stop', {}).get('max_open_positions', 5),
+                'max_correlation': rm.get('portfolio', {}).get('max_correlation', 0.7)
+            }
+        else:
+            if 'max_positions' not in rm['position_limits']:
+                rm['position_limits']['max_positions'] = rm.get('position_limits', {}).get('max_positions_per_symbol', 5)
+            if 'max_correlation' not in rm['position_limits']:
+                rm['position_limits']['max_correlation'] = rm.get('portfolio', {}).get('max_correlation', 0.7)
+                
+        # Normalize loss limits / max_drawdown
+        if 'loss_limits' not in rm:
+            rm['loss_limits'] = {
+                'max_drawdown': rm.get('emergency_stop', {}).get('max_drawdown_percent', 0.05)
+            }
+            
+        # Normalize risk per trade
+        if 'risk_per_trade' not in rm:
+            rm['risk_per_trade'] = rm.get('risk_per_trade', 0.02)
+            
+        return config
             
     async def _initialize_components(self) -> bool:
         """Initialize trading components with dependency injection"""
@@ -615,9 +657,8 @@ class ProfessionalTradingSystem:
     async def _process_symbol(self, symbol: str):
         """Process trading logic for a single symbol"""
         try:
-            # Implement per-symbol processing logic here
-            # This allows for parallel processing of multiple symbols
-            pass
+            # Safely delegate execution using public bot manager interface
+            await self.bot_manager.process_symbol(symbol)
         except Exception as e:
             self.logger.error(f"Error processing symbol {symbol}: {str(e)}")
 

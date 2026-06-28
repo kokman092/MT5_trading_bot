@@ -412,8 +412,19 @@ class RiskManager:
             
     async def _get_current_exposure(self) -> Dict[str, float]:
         """Get current exposure by symbol"""
-        # Placeholder - would be implemented to get actual exposure from broker
-        return {}
+        if not self.broker:
+            return {}
+        try:
+            positions = self.broker.get_positions()
+            exposure = {}
+            for pos in positions:
+                symbol = pos.get('symbol')
+                if symbol:
+                    exposure[symbol] = exposure.get(symbol, 0.0) + pos.get('volume', 0.0)
+            return exposure
+        except Exception as e:
+            self.logger.error(f"Error getting active exposure from broker: {str(e)}")
+            return {}
             
     def _calculate_volatility_adjustment(self, symbol: str, market_data: Optional[Dict]) -> float:
         """Calculate position size adjustment based on market volatility"""

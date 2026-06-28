@@ -108,7 +108,8 @@ def login_required(f):
             flash('Please log in to access this page', 'warning')
             return redirect(url_for('login'))
             
-        auth = Auth(app.config)
+        from flask import current_app
+        auth = Auth(current_app.config)
         valid, user_id = auth.verify_token(token)
         
         if not valid:

@@ -139,6 +139,7 @@ class MarketAnalyzer:
             # Convert to DataFrame
             df = pd.DataFrame(rates)
             df['time'] = pd.to_datetime(df['time'], unit='s')
+            df['symbol'] = symbol
             
             try:
                 # Trend indicators
@@ -757,7 +758,7 @@ class MarketAnalyzer:
                 price_to_support = (current_price - closest_support) / current_price
                 if price_to_support < 0.001:  # Price near support
                     stop_loss = closest_support - (current_atr * 1.5)
-                    take_profit = current_price + (current_price - closest_support) * 2
+                    take_profit = current_price + (current_atr * 2.5)
                     signals.append(Signal(
                         symbol=symbol,
                         type='BUY',
@@ -768,13 +769,13 @@ class MarketAnalyzer:
                         confidence=0.7,
                         entry_conditions={'support_level': closest_support},
                         market_context={'price_to_support': price_to_support}
-                    ))
-                    
+                      ))
+                      
             if closest_resistance is not None:
                 price_to_resistance = (closest_resistance - current_price) / current_price
                 if price_to_resistance < 0.001:  # Price near resistance
                     stop_loss = closest_resistance + (current_atr * 1.5)
-                    take_profit = current_price - (closest_resistance - current_price) * 2
+                    take_profit = current_price - (current_atr * 2.5)
                     signals.append(Signal(
                         symbol=symbol,
                         type='SELL',

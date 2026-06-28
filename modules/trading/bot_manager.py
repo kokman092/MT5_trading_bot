@@ -57,7 +57,13 @@ class BotManager:
             except Exception as e:
                 self.logger.error(f"Error initializing bot manager: {str(e)}")
                 return False
-    
+    async def process_symbol(self, symbol: str) -> bool:
+        """Delegate symbol execution to the active bot instance"""
+        if self._bot and self.is_running:
+            await self._bot.process_symbol(symbol)
+            return True
+        return False
+        
     @property
     def is_running(self) -> bool:
         return self._task is not None and not self._task.done()

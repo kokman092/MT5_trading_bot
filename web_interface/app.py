@@ -13,7 +13,7 @@ from modules.payment.payment_processor import PaymentProcessor
 from modules.support.support_manager import SupportManager
 from modules.payment.mock_stripe import MockStripe
 from modules.web.shared import initialize_mt5, get_account_info, get_open_positions, calculate_daily_pl, validate_trading_conditions
-from auth import Auth, login_required
+from auth import Auth, login_required as jwt_login_required
 import logging
 import threading
 import asyncio
