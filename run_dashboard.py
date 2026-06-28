@@ -112,7 +112,7 @@ class TradingDashboard:
         # Display equity chart
         equity_chart = self.create_equity_chart(trades_df)
         if equity_chart:
-            st.plotly_chart(equity_chart, use_container_width=True)
+            st.plotly_chart(equity_chart, width="stretch")
         
         # Display recent trades
         st.subheader("Recent Trades")

@@ -73,8 +73,8 @@ def add_technical_indicators(df):
     # Volatility indicators
     df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=14)
     bb = ta.volatility.BollingerBands(df['close'])
-    df['bb_upper'] = bb.bollinger_hband()
-    df['bb_lower'] = bb.bollinger_lband()
+    df['bollinger_upper'] = bb.bollinger_hband()
+    df['bollinger_lower'] = bb.bollinger_lband()
     
     df.ffill(inplace=True)
     df.fillna(0, inplace=True)

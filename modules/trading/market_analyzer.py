@@ -144,8 +144,12 @@ class MarketAnalyzer:
             df = pd.DataFrame(rates)
             df['time'] = pd.to_datetime(df['time'], unit='s')
             
-            # Calculate required technical indicators
             try:
+                # Trend indicators
+                df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
+                df['ema_20'] = ta.trend.ema_indicator(df['close'], window=20)
+                df['adx'] = ta.trend.adx(df['high'], df['low'], df['close'], window=14)
+                
                 # RSI
                 df['rsi'] = ta.momentum.rsi(df['close'], window=14)
                 

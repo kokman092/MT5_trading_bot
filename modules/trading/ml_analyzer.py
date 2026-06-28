@@ -255,6 +255,10 @@ class MLAnalyzer:
                 self.logger.warning(f"Empty dataframe after removing NaN values for {symbol_tf}")
                 return pd.DataFrame(), []
                 
+            # Sanitize column names to avoid special JSON characters that crash LightGBM
+            import re
+            df.columns = [re.sub(r'[ \t\n\r\f\v,:{}""\[\]]', '_', col) for col in df.columns]
+            
             # Extract features and target
             feature_cols = [col for col in df.columns if col not in ['datetime', 'open', 'high', 'low', 'close', 'volume', 'target']]
             
