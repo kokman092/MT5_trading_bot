@@ -138,7 +138,7 @@ class TradeExecutor:
             # Check risk-reward
             risk = abs(signal.entry_price - signal.stop_loss)
             reward = abs(signal.take_profit - signal.entry_price)
-            min_rr = self.config['risk_management']['min_risk_reward']
+            min_rr = self.config.get('risk_management', {}).get('min_risk_reward', 1.5)
 
             if reward / risk < min_rr:
                 return False

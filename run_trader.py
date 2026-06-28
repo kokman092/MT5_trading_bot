@@ -470,6 +470,10 @@ class ProfessionalTradingSystem:
         if 'risk_per_trade' not in rm:
             rm['risk_per_trade'] = rm.get('risk_per_trade', 0.02)
             
+        # Normalize min risk reward
+        if 'min_risk_reward' not in rm:
+            rm['min_risk_reward'] = config.get('trading_parameters', {}).get('risk_reward_ratio', 1.5)
+            
         return config
             
     async def _initialize_components(self) -> bool:
