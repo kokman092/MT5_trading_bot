@@ -261,7 +261,7 @@ class MLAnalyzer:
             
             # Extract features and target
             exclude_cols = ['datetime', 'time', 'open', 'high', 'low', 'close', 'volume', 'target', 'Unnamed_0', 'Unnamed__0']
-            feature_cols = [col for col in df.columns if col not in exclude_cols and 'Unnamed' not in col]
+            feature_cols = sorted([col for col in df.columns if col not in exclude_cols and 'Unnamed' not in col])
             
             if not feature_cols:
                 self.logger.error(f"No feature columns found in data for {symbol_tf}")
