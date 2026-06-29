@@ -48,6 +48,18 @@ def test_diagnostics():
     print("9. Calculating ATR...")
     df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=14)
     print("ATR calculated successfully!")
+
+    print("10. Calculating MACD...")
+    macd_indicator = ta.trend.MACD(close=df['close'], window_slow=26, window_fast=12, window_sign=9)
+    df['macd'] = macd_indicator.macd()
+    df['macd_signal'] = macd_indicator.macd_signal()
+    print("MACD calculated successfully!")
+
+    print("11. Calculating Bollinger Bands...")
+    bollinger = ta.volatility.BollingerBands(df['close'], window=20, window_dev=2)
+    df['bollinger_upper'] = bollinger.bollinger_hband()
+    df['bollinger_lower'] = bollinger.bollinger_lband()
+    print("Bollinger Bands calculated successfully!")
     
     print("\nDIAGNOSTICS PASSED! All technical libraries are working correctly.")
     mt5.shutdown()
