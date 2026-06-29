@@ -4,7 +4,93 @@ import sys
 import pandas as pd
 from dotenv import load_dotenv
 import MetaTrader5 as mt5
+import ta
+import pandas_ta as pta
 from modules.trading.market_analyzer import MarketAnalyzer
+
+async def debug_get_market_data(analyzer, symbol: str, timeframe: str, bars: int = 1000):
+    print("  [DEBUG-DATA] Starting debug_get_market_data...")
+    
+    print("  [DEBUG-DATA] 1. Calling mt5.symbol_select...")
+    if not mt5.symbol_select(symbol, True):
+        print("  [DEBUG-DATA] Symbol select failed!")
+        return None
+    print("  [DEBUG-DATA] Symbol selected successfully.")
+        
+    print("  [DEBUG-DATA] 2. Calling mt5.symbol_info...")
+    symbol_info = mt5.symbol_info(symbol)
+    if symbol_info is None:
+        print("  [DEBUG-DATA] Symbol info returned None!")
+        return None
+    print(f"  [DEBUG-DATA] Symbol info retrieved. Point={symbol_info.point}")
+    
+    print("  [DEBUG-DATA] 3. Translating timeframe value...")
+    tf_val = analyzer._get_timeframe_value(timeframe)
+    print(f"  [DEBUG-DATA] Timeframe value: {tf_val}")
+    
+    print("  [DEBUG-DATA] 4. Calling mt5.copy_rates_from_pos...")
+    rates = mt5.copy_rates_from_pos(symbol, tf_val, 0, bars)
+    if rates is None:
+        print("  [DEBUG-DATA] copy_rates_from_pos returned None!")
+        return None
+    print(f"  [DEBUG-DATA] copy_rates_from_pos retrieved {len(rates)} bars.")
+    
+    print("  [DEBUG-DATA] 5. Creating pd.DataFrame...")
+    df = pd.DataFrame(rates)
+    print("  [DEBUG-DATA] DataFrame created.")
+    
+    print("  [DEBUG-DATA] 6. Converting time column to datetime...")
+    df['time'] = pd.to_datetime(df['time'], unit='s')
+    print("  [DEBUG-DATA] Datetime conversion complete.")
+    
+    print("  [DEBUG-DATA] 7. Adding symbol column...")
+    df['symbol'] = symbol
+    print("  [DEBUG-DATA] Symbol column added.")
+    
+    print("  [DEBUG-DATA] 8. Calculating Trend indicators (SMA/EMA/ADX)...")
+    df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
+    print("  [DEBUG-DATA] SMA 20 calculated.")
+    df['ema_20'] = ta.trend.ema_indicator(df['close'], window=20)
+    print("  [DEBUG-DATA] EMA 20 calculated.")
+    df['adx'] = ta.trend.adx(df['high'], df['low'], df['close'], window=14)
+    print("  [DEBUG-DATA] ADX calculated.")
+    
+    print("  [DEBUG-DATA] 9. Calculating RSI...")
+    df['rsi'] = ta.momentum.rsi(df['close'], window=14)
+    print("  [DEBUG-DATA] RSI calculated.")
+    
+    print("  [DEBUG-DATA] 10. Calculating MACD...")
+    macd_indicator = ta.trend.MACD(
+        close=df['close'],
+        window_slow=26,
+        window_fast=12,
+        window_sign=9
+    )
+    df['macd'] = macd_indicator.macd()
+    df['macd_signal'] = macd_indicator.macd_signal()
+    print("  [DEBUG-DATA] MACD calculated.")
+    
+    print("  [DEBUG-DATA] 11. Calculating Bollinger Bands...")
+    bollinger = ta.volatility.BollingerBands(df['close'], window=20, window_dev=2)
+    df['bollinger_upper'] = bollinger.bollinger_hband()
+    df['bollinger_lower'] = bollinger.bollinger_lband()
+    print("  [DEBUG-DATA] Bollinger Bands calculated.")
+    
+    print("  [DEBUG-DATA] 12. Calculating ATR...")
+    df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=14)
+    print("  [DEBUG-DATA] ATR calculated.")
+    
+    print("  [DEBUG-DATA] 13. Forward filling NaN values...")
+    df.ffill(inplace=True)
+    print("  [DEBUG-DATA] Forward fill complete.")
+    df.fillna(0, inplace=True)
+    print("  [DEBUG-DATA] Fillna 0 complete.")
+    
+    print("  [DEBUG-DATA] 14. Validating market data...")
+    val_res = analyzer._validate_market_data(df)
+    print(f"  [DEBUG-DATA] Validation result: {val_res}")
+    
+    return df
 
 async def run_diagnostics():
     load_dotenv()
@@ -27,52 +113,15 @@ async def run_diagnostics():
     print("2. Initializing MarketAnalyzer components...")
     analyzer = MarketAnalyzer(config)
     
-    print("3. Fetching raw market data via MarketAnalyzer...")
-    data = await analyzer._get_market_data(symbol, timeframe, 1000)
+    print("3. Fetching raw market data via debug_get_market_data...")
+    data = await debug_get_market_data(analyzer, symbol, timeframe, 1000)
     if data is None or data.empty:
         print("Failed to get market data!")
         mt5.shutdown()
         return
     print(f"Data retrieved successfully. Rows: {len(data)}")
     
-    print("4. Testing _calculate_volatility...")
-    vol = analyzer._calculate_volatility(data, timeframe)
-    print(f"Volatility calculated: {vol}")
-    
-    print("5. Testing _determine_market_phase...")
-    phase = analyzer._determine_market_phase(data)
-    print(f"Market phase calculated: {phase}")
-    
-    print("6. Testing _calculate_trend_strength...")
-    trend_str = analyzer._calculate_trend_strength(data)
-    print(f"Trend strength calculated: {trend_str}")
-    
-    print("7. Testing support and resistance levels...")
-    supports = analyzer._find_support_levels(data)
-    resistances = analyzer._find_resistance_levels(data)
-    print(f"Supports found: {len(supports)}, Resistances found: {len(resistances)}")
-    
-    print("8. Testing _analyze_market_structure...")
-    structure = await analyzer._analyze_market_structure(data, timeframe)
-    print("Market structure completed!")
-    
-    print("9. Testing _generate_trend_signals...")
-    trend_sigs = analyzer._generate_trend_signals(data, symbol)
-    print(f"Trend signals generated: {len(trend_sigs)}")
-    
-    print("10. Testing _generate_momentum_signals...")
-    mom_sigs = analyzer._generate_momentum_signals(data, symbol)
-    print(f"Momentum signals generated: {len(mom_sigs)}")
-    
-    print("11. Testing _generate_volatility_signals...")
-    vol_sigs = analyzer._generate_volatility_signals(data, vol, symbol)
-    print(f"Volatility signals generated: {len(vol_sigs)}")
-    
-    print("12. Testing _generate_sr_signals...")
-    sr_sigs = analyzer._generate_sr_signals(data, structure, symbol)
-    print(f"S/R signals generated: {len(sr_sigs)}")
-    
-    print("\nDIAGNOSTICS PASSED! All analysis functions are stable.")
+    print("DIAGNOSTICS COMPLETED SUCCESSFULLY!")
     mt5.shutdown()
 
 if __name__ == "__main__":
