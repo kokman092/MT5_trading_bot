@@ -30,6 +30,17 @@ def test_diagnostics():
         
     print("4. Creating Pandas DataFrame...")
     df = pd.DataFrame(rates)
+
+    print("4.1. Getting mt5.symbol_info...")
+    symbol_info = mt5.symbol_info(symbol)
+    if symbol_info is not None:
+        print(f"Symbol info retrieved: point={symbol_info.point}")
+    else:
+        print("Symbol info returned None!")
+
+    print("4.2. Converting df['time'] to datetime...")
+    df['time'] = pd.to_datetime(df['time'], unit='s')
+    print("Datetime conversion successful!")
     
     print("5. Calculating SMA 20...")
     df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
