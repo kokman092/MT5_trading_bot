@@ -67,6 +67,8 @@ class TradingBot:
                             break
                         await self._process_symbol(symbol)
                         
+                    self.logger.info(f"Market analysis cycle completed for: {self.symbols}")
+                        
                     # Manage existing positions
                     try:
                         await self.position_manager.manage_positions()

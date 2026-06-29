@@ -1085,40 +1085,56 @@ class RiskManager:
     async def _calculate_exposure_factor(self, symbol: str, position_size: float, account_balance: float) -> float:
         """Calculate adjustment factor based on account exposure limits"""
         try:
-            # Get current exposure
-            current_exposure = await self._get_current_exposure()
+            # Get current exposure (in lots)
+            current_exposure_lots = await self._get_current_exposure()
             
-            # Calculate total exposure as percentage of account balance
-            total_exposure_pct = sum(current_exposure.values()) / account_balance if account_balance > 0 else 0
+            # Convert current exposure to notional value in deposit currency
+            total_exposure_val = 0.0
+            for sym, lots in current_exposure_lots.items():
+                total_exposure_val += lots * self._get_position_notional_value(sym)
+                
+            # Get account leverage from MT5 (default to 100.0 if not found)
+            leverage = 100.0
+            acc_info = mt5.account_info()
+            if acc_info:
+                leverage = float(getattr(acc_info, 'leverage', 100.0))
+                
+            # Available buying power is balance * leverage
+            buying_power = account_balance * leverage
+            if buying_power <= 0:
+                return 0.0
+                
+            # Calculate total exposure as percentage of buying power
+            total_exposure_pct = total_exposure_val / buying_power
             
             # Get maximum allowed exposure
             max_exposure = self.config['risk_management'].get('portfolio', {}).get('max_exposure', 0.8)
             
             # If adding this position would exceed max exposure, scale it down
             estimated_new_position_value = position_size * self._get_position_notional_value(symbol)
-            estimated_new_exposure_pct = total_exposure_pct + (estimated_new_position_value / account_balance)
+            estimated_new_exposure_pct = total_exposure_pct + (estimated_new_position_value / buying_power)
             
             if estimated_new_exposure_pct > max_exposure:
                 # Scale down position to fit within max exposure
-                available_exposure_pct = max(0, max_exposure - total_exposure_pct)
-                max_position_value = available_exposure_pct * account_balance
+                available_exposure_pct = max(0.0, max_exposure - total_exposure_pct)
+                max_position_value = available_exposure_pct * buying_power
                 max_position_size = max_position_value / self._get_position_notional_value(symbol)
                 
                 # Return factor to scale down position
                 return max_position_size / position_size if position_size > 0 else 0.0
                 
             # Check symbol-specific exposure
-            symbol_exposure = current_exposure.get(symbol, 0)
-            symbol_exposure_pct = symbol_exposure / account_balance if account_balance > 0 else 0
+            symbol_exposure_lots = current_exposure_lots.get(symbol, 0.0)
+            symbol_exposure_val = symbol_exposure_lots * self._get_position_notional_value(symbol)
+            symbol_exposure_pct = symbol_exposure_val / buying_power
             
             max_symbol_exposure = self.config['risk_management'].get('portfolio', {}).get('max_exposure_per_instrument', 0.3)
-            
-            estimated_new_symbol_exposure_pct = symbol_exposure_pct + (estimated_new_position_value / account_balance)
+            estimated_new_symbol_exposure_pct = symbol_exposure_pct + (estimated_new_position_value / buying_power)
             
             if estimated_new_symbol_exposure_pct > max_symbol_exposure:
                 # Scale down position to fit within max symbol exposure
-                available_symbol_exposure = max(0, max_symbol_exposure - symbol_exposure_pct)
-                max_symbol_position_value = available_symbol_exposure * account_balance
+                available_symbol_exposure = max(0.0, max_symbol_exposure - symbol_exposure_pct)
+                max_symbol_position_value = available_symbol_exposure * buying_power
                 max_symbol_position_size = max_symbol_position_value / self._get_position_notional_value(symbol)
                 
                 return max_symbol_position_size / position_size if position_size > 0 else 0.0
