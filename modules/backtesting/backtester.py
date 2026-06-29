@@ -59,8 +59,24 @@ class Backtester:
     def _get_historical_data(self, symbol: str, timeframe: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
         """Get historical data from MT5"""
         try:
+            # Ensure symbol is active in Market Watch
+            select_status = mt5.symbol_select(symbol, True)
+            print(f"  [BACKTEST-DEBUG] mt5.symbol_select('{symbol}'): {select_status}")
+            
             mt5_timeframe = self.timeframe_map.get(timeframe, mt5.TIMEFRAME_H1)
+            
+            # Force cache warm-up by requesting the last 5000 bars
+            warmup_rates = mt5.copy_rates_from_pos(symbol, mt5_timeframe, 0, 5000)
+            if warmup_rates is None:
+                print(f"  [BACKTEST-DEBUG] Warmup rates failed! MT5 Error: {mt5.last_error()}")
+            else:
+                print(f"  [BACKTEST-DEBUG] Warmup rates retrieved: {len(warmup_rates)}")
+            
             rates = mt5.copy_rates_range(symbol, mt5_timeframe, start_date, end_date)
+            if rates is None:
+                print(f"  [BACKTEST-DEBUG] Range rates failed! MT5 Error: {mt5.last_error()}")
+            else:
+                print(f"  [BACKTEST-DEBUG] Range rates from {start_date} to {end_date} retrieved: {len(rates)}")
             
             if rates is None or len(rates) == 0:
                 return None
@@ -117,6 +133,7 @@ class Backtester:
         for i in range(1, len(df)):
             current_price = df['close'].iloc[i]
             current_time = df['time'].iloc[i]
+            profit = 0.0
             
             # Update open position if exists
             if open_position:
