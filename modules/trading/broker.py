@@ -154,6 +154,20 @@ class MT5Broker:
             'magic': pos.magic
         } for pos in positions]
         
+    def _get_filling_mode(self, symbol: str) -> int:
+        """Get the supported filling mode for a symbol dynamically"""
+        symbol_info = mt5.symbol_info(symbol)
+        if symbol_info is None:
+            return mt5.ORDER_FILLING_IOC
+            
+        filling_mode = symbol_info.filling_mode
+        if filling_mode & mt5.SYMBOL_FILLING_FOK:
+            return mt5.ORDER_FILLING_FOK
+        elif filling_mode & mt5.SYMBOL_FILLING_IOC:
+            return mt5.ORDER_FILLING_IOC
+        else:
+            return mt5.ORDER_FILLING_RETURN
+
     def place_order(self, order_params: Dict) -> Optional[int]:
         """Place a new order"""
         if not self.initialized:
@@ -171,7 +185,7 @@ class MT5Broker:
             "magic": order_params.get('magic', 123456),
             "comment": order_params.get('comment', ""),
             "type_time": mt5.ORDER_TIME_GTC,
-            "type_filling": mt5.ORDER_FILLING_IOC,
+            "type_filling": self._get_filling_mode(order_params['symbol']),
         }
         
         result = mt5.order_send(request)
@@ -221,7 +235,7 @@ class MT5Broker:
             "magic": 123456,
             "comment": "Close position",
             "type_time": mt5.ORDER_TIME_GTC,
-            "type_filling": mt5.ORDER_FILLING_IOC,
+            "type_filling": self._get_filling_mode(position[0].symbol),
         }
         
         result = mt5.order_send(request)

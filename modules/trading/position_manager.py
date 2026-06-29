@@ -297,6 +297,20 @@ class PositionManager:
         except Exception as e:
             self.logger.error(f"Error closing all positions: {str(e)}")
 
+    def _get_filling_mode(self, symbol: str) -> int:
+        """Get the supported filling mode for a symbol dynamically"""
+        symbol_info = mt5.symbol_info(symbol)
+        if symbol_info is None:
+            return mt5.ORDER_FILLING_IOC
+            
+        filling_mode = symbol_info.filling_mode
+        if filling_mode & mt5.SYMBOL_FILLING_FOK:
+            return mt5.ORDER_FILLING_FOK
+        elif filling_mode & mt5.SYMBOL_FILLING_IOC:
+            return mt5.ORDER_FILLING_IOC
+        else:
+            return mt5.ORDER_FILLING_RETURN
+
     async def _close_position(self, ticket: int) -> bool:
         """Close a position"""
         try:
@@ -316,7 +330,7 @@ class PositionManager:
                 "magic": 234000,
                 "comment": "close_by_manager",
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": self._get_filling_mode(position.symbol),
             }
 
             result = mt5.order_send(request)
@@ -714,7 +728,7 @@ class PositionManager:
                 "magic": 234000,
                 "comment": "consolidated_position",
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": self._get_filling_mode(symbol),
             }
             
             result = mt5.order_send(request)
