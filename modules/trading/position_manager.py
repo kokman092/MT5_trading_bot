@@ -139,53 +139,8 @@ class PositionManager:
             
     async def _check_close_conditions(self, position):
         """Check if position should be closed based on various conditions"""
-        try:
-            # Get market data
-            symbol_data = await self._get_market_data(position.symbol)
-            if symbol_data is None:
-                return
-
-            close_position = False
-            reason = ""
-
-            # Check time-based exit
-            if self._is_session_ending(position.symbol):
-                close_position = True
-                reason = "Session ending"
-
-            # Check technical conditions
-            if not close_position:
-                rsi = self._calculate_rsi(symbol_data['close'])
-                volatility = self._calculate_volatility(symbol_data)
-                trend_strength = self._calculate_trend_strength(symbol_data)
-
-                # Exit on RSI extremes
-                if position.type == 0:  # Buy position
-                    if rsi > 70:
-                        close_position = True
-                        reason = "RSI overbought"
-                else:  # Sell position
-                    if rsi < 30:
-                        close_position = True
-                        reason = "RSI oversold"
-
-            # Check risk/reward
-            if not close_position:
-                risk_reward = self._calculate_risk_reward(position)
-                target_rr = self.config.get('take_profit', {}).get('risk_reward_ratio', 2.0)
-                if risk_reward >= target_rr:
-                    close_position = True
-                    reason = "Target R/R reached"
-
-            # Close position if conditions met
-            if close_position:
-                success = await self._close_position(position.ticket)
-                if success:
-                    self.logger.info(
-                        f"Closed position {position.ticket}: {reason}")
-
-        except Exception as e:
-            self.logger.error(f"Error checking close conditions: {str(e)}")
+        # Python-driven auto-closures are disabled. Positions will only close when hitting SL/TP in MT5.
+        return
 
     def _update_trailing_stop(self, position):
         """Update trailing stop loss based on R-multiples"""
