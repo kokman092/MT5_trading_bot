@@ -14,6 +14,10 @@ import gc
 import time
 import signal
 from typing import Dict, List, Optional, Tuple
+import warnings
+
+# Suppress XGBoost serialization warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="xgboost")
 
 # Import trading components
 from modules.trading.market_analyzer import MarketAnalyzer
