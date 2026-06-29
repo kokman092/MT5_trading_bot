@@ -203,16 +203,30 @@ class RiskManager:
             
             # Fetch point size and tick value from MT5 symbol info to calculate distance in points correctly
             point = 0.00001
-            tick_value = 1.0
+            tick_value = 0.0
+            contract_size = 100000.0
             symbol_info = mt5.symbol_info(symbol)
             if symbol_info:
                 point = symbol_info.point
                 tick_value = symbol_info.trade_tick_value
+                contract_size = getattr(symbol_info, 'trade_contract_size', 100000.0)
             else:
                 if "JPY" in symbol:
                     point = 0.001
                 elif "XAU" in symbol:
                     point = 0.01
+                    contract_size = 100.0
+
+            # Fallback if tick_value is uninitialized or 0
+            if tick_value <= 0:
+                current_price = (entry_price if entry_price > 0 else 1.0)
+                if symbol.startswith("USD"):
+                    # USD is base currency, e.g. USDJPY
+                    tick_value = (contract_size * point) / current_price
+                else:
+                    # USD is counter currency, e.g. EURUSD, GBPUSD, XAUUSD
+                    tick_value = contract_size * point
+                self.logger.info(f"{symbol}: MT5 trade_tick_value was invalid, computed fallback tick_value = {tick_value:.6f}")
 
             # Calculate stop loss distance in points/pips
             is_long = entry_price > stop_loss
@@ -227,6 +241,7 @@ class RiskManager:
                 
             # Calculate position size in lots
             if pip_distance == 0 or tick_value <= 0:
+                self.logger.warning(f"{symbol}: Invalid pip_distance ({pip_distance}) or tick_value ({tick_value})")
                 return 0.0, {"error": "Zero stop loss distance or invalid tick value"}
                 
             # Basic position size calculation
@@ -260,7 +275,7 @@ class RiskManager:
             position_size *= confidence_factor
             
             # Log pre-limit position size and factors
-            self.logger.debug(
+            self.logger.info(
                 f"{symbol}: Sizing factors — basic_size={risk_amount / (pip_distance * tick_value):.4f}, "
                 f"portfolio={portfolio_factor:.2f}, volatility={volatility_factor:.2f}, "
                 f"regime={regime_factor:.2f}, exposure={exposure_factor:.2f}, confidence={confidence_factor:.2f}"
