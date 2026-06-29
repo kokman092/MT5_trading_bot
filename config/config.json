@@ -294,9 +294,9 @@
         "max_daily_loss": 0.05,
         "max_position_size": 0.5,
         "position_sizing": {
-            "max_size": 0.01,
-            "min_size": 0.001,
-            "size_increment": 0.001,
+            "max_size": 10.0,
+            "min_size": 0.01,
+            "size_increment": 0.01,
             "max_total_risk": 0.06
         },
         "loss_limits": {

@@ -8,14 +8,14 @@ mt5_account:
 # Trading Parameters
 trading:
   symbols:
-    - "EURUSD"
-    - "GBPUSD"
-    - "USDJPY"
-    - "AUDUSD"
+    # - "EURUSD"
+    # - "GBPUSD"
+    # - "USDJPY"
+    # - "AUDUSD"
     - "XAUUSD"
   timeframes:
-    primary: "M5"
-    secondary: ["M15", "H1"]
+    primary: "M15"
+    secondary: "H1"
   session_times:
     start: "00:00"
     end: "23:59"
