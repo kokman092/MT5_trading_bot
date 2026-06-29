@@ -1057,23 +1057,26 @@ class ProfessionalTradingSystem:
     def _check_system_resources(self) -> bool:
         """Check system resources availability"""
         try:
-            # Check CPU usage
+            # Check CPU usage (warn above 80%, do not fail trading on spikes)
             cpu_percent = psutil.cpu_percent()
-            if cpu_percent > 80:  # 80% threshold
+            if cpu_percent > 80:
                 logger.warning(f"High CPU usage: {cpu_percent}%")
-                return False
+                if cpu_percent > 95:  # Critical threshold
+                    return False
                 
-            # Check memory usage
+            # Check memory usage (warn above 80%, fail only above 95% critical)
             memory = psutil.virtual_memory()
-            if memory.percent > 85:  # 85% threshold
+            if memory.percent > 80:
                 logger.warning(f"High memory usage: {memory.percent}%")
-                return False
+                if memory.percent > 95:  # Critical threshold
+                    return False
                 
-            # Check disk usage
+            # Check disk usage (warn above 90%, fail above 98% critical)
             disk = psutil.disk_usage('/')
-            if disk.percent > 90:  # 90% threshold
+            if disk.percent > 90:
                 logger.warning(f"High disk usage: {disk.percent}%")
-                return False
+                if disk.percent > 98:  # Critical threshold
+                    return False
                 
             return True
             
