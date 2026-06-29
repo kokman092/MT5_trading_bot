@@ -21,8 +21,8 @@ def test_diagnostics():
     print(f"2. Selecting symbol: {symbol}")
     mt5.symbol_select(symbol, True)
     
-    print("3. Pulling 100 bars of historical data...")
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 100)
+    print("3. Pulling 1000 bars of historical data...")
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 1000)
     if rates is None:
         print("Failed to pull rates!")
         mt5.shutdown()
