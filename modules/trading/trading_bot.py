@@ -129,6 +129,22 @@ class TradingBot:
             final_signal = self._combine_signals(signals, ml_signals)
             
             if final_signal and final_signal.direction != 'none':
+                # Calculate position size
+                try:
+                    account_info = await self.broker.get_account_info()
+                    balance = account_info.get('balance', 10000.0) if account_info else 10000.0
+                    pos_size, risk_info = await self.risk_manager.calculate_position_size(
+                        symbol=symbol,
+                        entry_price=final_signal.entry_price,
+                        stop_loss=final_signal.stop_loss,
+                        account_balance=balance,
+                        market_data=market_data
+                    )
+                    final_signal.position_size = pos_size
+                except Exception as e:
+                    self.logger.error(f"Error calculating position size for {symbol}: {str(e)}")
+                    final_signal.position_size = 0.01
+
                 # Validate trading conditions
                 try:
                     if await self.risk_manager.validate_trade(symbol, final_signal):

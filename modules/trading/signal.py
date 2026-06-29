@@ -271,6 +271,16 @@ class Signal:
                 raise ValueError(f"TP level price ({tp['price']}) must be below entry price ({self.entry_price}) for SELL signal")
         
     @property
+    def volume(self) -> float:
+        """Compatibility getter for position size/volume"""
+        return self.position_size if self.position_size is not None else 0.01
+
+    @volume.setter
+    def volume(self, value: float):
+        """Compatibility setter for position size/volume"""
+        self.position_size = value
+
+    @property
     def risk_reward_ratio(self) -> Optional[float]:
         """Calculate risk-to-reward ratio for the signal"""
         if self.take_profit is None:
