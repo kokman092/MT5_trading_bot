@@ -91,17 +91,20 @@ class TradingBot:
         try:
             # Check if market is open for this symbol
             if not self._is_market_open(symbol):
+                self.logger.debug(f"{symbol}: Market closed, skipping")
                 return
                 
             # Get market data and analyze for each timeframe
             timeframe = self.config['trading']['timeframes'][0]  # Use primary timeframe
             market_data = await self.market_analyzer.get_market_data(symbol, timeframe)
             if market_data is None:
+                self.logger.debug(f"{symbol}: No market data available")
                 return
                 
             # Analyze market data
             market_analysis = await self.market_analyzer.analyze_market(symbol, timeframe)
             if market_analysis is None:
+                self.logger.debug(f"{symbol}: Market analysis returned None")
                 return
                 
             # Generate trading signals
@@ -129,6 +132,8 @@ class TradingBot:
             final_signal = self._combine_signals(signals, ml_signals)
             
             if final_signal and final_signal.direction != 'none':
+                self.logger.info(f"{symbol}: Signal detected — direction={final_signal.direction}, "
+                               f"confidence={final_signal.confidence:.2f}, strength={final_signal.strength}")
                 # Calculate position size
                 try:
                     account_info = await self.broker.get_account_info()
@@ -155,6 +160,7 @@ class TradingBot:
                         market_data=market_info_dict
                     )
                     final_signal.position_size = pos_size
+                    self.logger.info(f"{symbol}: Position size calculated = {pos_size}")
                 except Exception as e:
                     self.logger.error(f"Error calculating position size for {symbol}: {str(e)}")
                     final_signal.position_size = 0.01
@@ -162,10 +168,15 @@ class TradingBot:
                 # Validate trading conditions
                 try:
                     if await self.risk_manager.validate_trade(symbol, final_signal):
+                        self.logger.info(f"{symbol}: Trade validated, executing...")
                         # Execute trade
                         await self.trade_executor.execute_trade(final_signal)
+                    else:
+                        self.logger.info(f"{symbol}: Trade rejected by risk manager")
                 except Exception as e:
                     self.logger.error(f"Error validating/executing trade for {symbol}: {str(e)}")
+            else:
+                self.logger.debug(f"{symbol}: No actionable signal this cycle")
                     
         except Exception as e:
             self.logger.error(f"Error processing symbol {symbol}: {str(e)}")
