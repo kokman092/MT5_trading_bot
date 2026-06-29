@@ -37,12 +37,16 @@ class RiskManager:
             'loss_streak': 0
         }
         self.risk_params = RiskParameters(
-            config['risk_management']['max_daily_loss'],
-            config['risk_management']['max_position_size'],
-            config['risk_management']['position_limits']['max_correlation'],
-            config['risk_management']['position_limits']['max_positions'],
-            config['risk_management']['risk_per_trade'],
-            config['risk_management']['loss_limits']['max_drawdown']
+            config.get('risk_management', {}).get('max_daily_loss', 
+                config.get('risk_management', {}).get('emergency_stop', {}).get('max_daily_loss_percent', 0.03)),
+            config.get('risk_management', {}).get('max_position_size', 1.0),
+            config.get('risk_management', {}).get('position_limits', {}).get('max_correlation', 
+                config.get('risk_management', {}).get('portfolio', {}).get('max_correlation', 0.7)),
+            config.get('risk_management', {}).get('position_limits', {}).get('max_positions', 
+                config.get('risk_limits', {}).get('max_open_positions', 5)),
+            config.get('risk_management', {}).get('risk_per_trade', 0.02),
+            config.get('risk_management', {}).get('loss_limits', {}).get('max_drawdown', 
+                config.get('risk_management', {}).get('emergency_stop', {}).get('max_drawdown_percent', 0.05))
         )
         self._validate_risk_config()
         
