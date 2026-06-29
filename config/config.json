@@ -6,10 +6,6 @@
     },
     "trading": {
         "symbols": [
-            "EURUSD",
-            "GBPUSD",
-            "USDJPY",
-            "AUDUSD",
             "XAUUSD"
         ],
         "timeframes": [
