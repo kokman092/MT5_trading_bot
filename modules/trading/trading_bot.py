@@ -196,7 +196,12 @@ class TradingBot:
                         # Record trade time immediately to prevent race conditions during execution
                         self._last_trade_time[symbol] = datetime.now()
                         # Execute trade
-                        await self.trade_executor.execute_trade(final_signal)
+                        exec_result = await self.trade_executor.execute_trade(final_signal)
+                        if exec_result and exec_result.get('success'):
+                            self.logger.info(f"{symbol}: Trade executed successfully. Details: {exec_result}")
+                        else:
+                            err_msg = exec_result.get('error', 'Unknown error') if isinstance(exec_result, dict) else 'Unknown error'
+                            self.logger.warning(f"{symbol}: Trade execution failed: {err_msg}")
                     else:
                         self.logger.info(f"{symbol}: Trade rejected by risk manager")
                 except Exception as e:
