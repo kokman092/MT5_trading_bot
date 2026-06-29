@@ -98,6 +98,12 @@ class MarketAnalyzer:
             # Calculate trend strength
             trend_strength = self._calculate_trend_strength(data)
             
+            # Determine major trend direction using EMA 200
+            ema200 = ta.trend.ema_indicator(data['close'], window=200)
+            current_price = data['close'].iloc[-1]
+            current_ema200 = ema200.iloc[-1] if len(ema200) > 0 else current_price
+            major_trend = 'bullish' if current_price >= current_ema200 else 'bearish'
+            
             # Find support and resistance levels
             support_levels = self._find_support_levels(data)
             resistance_levels = self._find_resistance_levels(data)
@@ -107,6 +113,7 @@ class MarketAnalyzer:
                 'volatility': volatility,
                 'market_phase': market_phase,
                 'trend_strength': trend_strength,
+                'major_trend': major_trend,
                 'support_levels': support_levels,
                 'resistance_levels': resistance_levels,
                 'timestamp': datetime.now()
@@ -848,6 +855,15 @@ class MarketAnalyzer:
             rr_ratio = signal.get_risk_reward_ratio()
             if rr_ratio is not None and rr_ratio < 1.5:
                 return False  # Minimum risk-reward ratio
+                
+            # Enforce major trend alignment (EMA 200)
+            major_trend = market_structure.get('major_trend')
+            if major_trend == 'bearish' and signal.type.upper() == 'BUY':
+                self.logger.info(f"{signal.symbol}: BUY signal rejected — counter-trend to major EMA 200 bearish trend")
+                return False
+            if major_trend == 'bullish' and signal.type.upper() == 'SELL':
+                self.logger.info(f"{signal.symbol}: SELL signal rejected — counter-trend to major EMA 200 bullish trend")
+                return False
                 
             return True
             
