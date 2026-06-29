@@ -161,9 +161,10 @@ class MT5Broker:
             return mt5.ORDER_FILLING_IOC
             
         filling_mode = symbol_info.filling_mode
-        if filling_mode & mt5.SYMBOL_FILLING_FOK:
+        # 1 = SYMBOL_FILLING_FOK, 2 = SYMBOL_FILLING_IOC
+        if filling_mode & 1:
             return mt5.ORDER_FILLING_FOK
-        elif filling_mode & mt5.SYMBOL_FILLING_IOC:
+        elif filling_mode & 2:
             return mt5.ORDER_FILLING_IOC
         else:
             return mt5.ORDER_FILLING_RETURN
@@ -427,7 +428,7 @@ class MT5Broker:
                 "magic": self.config.get('magic_number', 234000),
                 "comment": trade_params.get('comment', 'python trade'),
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": self._get_filling_mode(trade_params['symbol']),
             }
 
             # Execute trade
@@ -473,7 +474,7 @@ class MT5Broker:
                 "magic": position.magic,
                 "comment": "python close",
                 "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
+                "type_filling": self._get_filling_mode(position.symbol),
             }
 
             # Execute close

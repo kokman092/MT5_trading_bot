@@ -304,9 +304,10 @@ class PositionManager:
             return mt5.ORDER_FILLING_IOC
             
         filling_mode = symbol_info.filling_mode
-        if filling_mode & mt5.SYMBOL_FILLING_FOK:
+        # 1 = SYMBOL_FILLING_FOK, 2 = SYMBOL_FILLING_IOC
+        if filling_mode & 1:
             return mt5.ORDER_FILLING_FOK
-        elif filling_mode & mt5.SYMBOL_FILLING_IOC:
+        elif filling_mode & 2:
             return mt5.ORDER_FILLING_IOC
         else:
             return mt5.ORDER_FILLING_RETURN
