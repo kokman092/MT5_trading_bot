@@ -1,6 +1,7 @@
 import MetaTrader5 as mt5
 import pandas as pd
 import ta
+import pandas_ta as pta
 import os
 from dotenv import load_dotenv
 
@@ -60,6 +61,10 @@ def test_diagnostics():
     df['bollinger_upper'] = bollinger.bollinger_hband()
     df['bollinger_lower'] = bollinger.bollinger_lband()
     print("Bollinger Bands calculated successfully!")
+
+    print("12. Calculating Momentum using pandas_ta (pta.rsi)...")
+    df['pta_rsi'] = pta.rsi(df['close'], length=14)
+    print("pandas_ta RSI calculated successfully!")
     
     print("\nDIAGNOSTICS PASSED! All technical libraries are working correctly.")
     mt5.shutdown()
