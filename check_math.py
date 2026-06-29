@@ -1,0 +1,56 @@
+import MetaTrader5 as mt5
+import pandas as pd
+import ta
+import os
+from dotenv import load_dotenv
+
+def test_diagnostics():
+    load_dotenv()
+    login = int(os.getenv("MT5_LOGIN"))
+    password = os.getenv("MT5_PASSWORD")
+    server = os.getenv("MT5_SERVER")
+    
+    print("1. Initializing MT5...")
+    if not mt5.initialize(login=login, password=password, server=server):
+        print("MT5 Initialization failed!")
+        return
+        
+    symbol = "XAUUSD.std"
+    print(f"2. Selecting symbol: {symbol}")
+    mt5.symbol_select(symbol, True)
+    
+    print("3. Pulling 100 bars of historical data...")
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 100)
+    if rates is None:
+        print("Failed to pull rates!")
+        mt5.shutdown()
+        return
+        
+    print("4. Creating Pandas DataFrame...")
+    df = pd.DataFrame(rates)
+    
+    print("5. Calculating SMA 20...")
+    df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
+    print("SMA 20 calculated successfully!")
+    
+    print("6. Calculating EMA 20...")
+    df['ema_20'] = ta.trend.ema_indicator(df['close'], window=20)
+    print("EMA 20 calculated successfully!")
+    
+    print("7. Calculating ADX...")
+    df['adx'] = ta.trend.adx(df['high'], df['low'], df['close'], window=14)
+    print("ADX calculated successfully!")
+    
+    print("8. Calculating RSI...")
+    df['rsi'] = ta.momentum.rsi(df['close'], window=14)
+    print("RSI calculated successfully!")
+    
+    print("9. Calculating ATR...")
+    df['atr'] = ta.volatility.average_true_range(df['high'], df['low'], df['close'], window=14)
+    print("ATR calculated successfully!")
+    
+    print("\nDIAGNOSTICS PASSED! All technical libraries are working correctly.")
+    mt5.shutdown()
+
+if __name__ == "__main__":
+    test_diagnostics()
