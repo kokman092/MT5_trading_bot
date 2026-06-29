@@ -636,6 +636,9 @@ class ProfessionalTradingSystem:
                     
                     self.logger.info(f"System trading cycle completed for: {self.config['trading']['symbols']}")
                     
+                    # Clean up memory from temporary DataFrames and ML predictions immediately
+                    gc.collect()
+                    
                     # Calculate execution time and adjust sleep time
                     execution_time = time.time() - cycle_start
                     sleep_time = max(0, trading_interval - execution_time)
