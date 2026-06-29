@@ -416,12 +416,13 @@ class MT5Broker:
                 return {'success': False, 'error': 'Symbol not found'}
 
             # Prepare trade request
+            is_long = trade_params['direction'].lower() in ['long', 'buy']
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": trade_params['symbol'],
                 "volume": trade_params['volume'],
-                "type": mt5.ORDER_TYPE_BUY if trade_params['direction'] == 'long' else mt5.ORDER_TYPE_SELL,
-                "price": symbol_info.ask if trade_params['direction'] == 'long' else symbol_info.bid,
+                "type": mt5.ORDER_TYPE_BUY if is_long else mt5.ORDER_TYPE_SELL,
+                "price": symbol_info.ask if is_long else symbol_info.bid,
                 "sl": trade_params['stop_loss'],
                 "tp": trade_params['take_profit'],
                 "deviation": self.config.get('order_deviation', 20),
