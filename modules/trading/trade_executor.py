@@ -350,19 +350,20 @@ class TradeExecutor:
                 position_data = self.open_positions[trade_id]
 
                 # Update position status
-                position = await self.broker.get_position(trade_id)
-                if not position:
+                positions = mt5.positions_get(ticket=trade_id)
+                if not positions:
                     del self.open_positions[trade_id]
                     break
+                position = positions[0]
 
                 # Check and update trailing stop
-                await self._update_trailing_stop(trade_id, position)
+                self._update_trailing_stop(trade_id, position)
 
                 # Check and update breakeven stop
-                await self._update_breakeven_stop(trade_id, position)
+                self._update_breakeven_stop(trade_id, position)
 
                 # Check partial profit taking
-                await self._check_partial_profit(trade_id, position)
+                self._check_partial_profit(trade_id, position)
 
                 # Sleep before next check
                 await asyncio.sleep(1)

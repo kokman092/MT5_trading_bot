@@ -117,7 +117,7 @@ class PositionManager:
                 if symbol_data is not None:
                     # Update trailing stop
                     if self.config['trading_parameters']['exit_parameters']['trailing_stop']['enabled']:
-                        await self._update_trailing_stop(position)
+                        self._update_trailing_stop(position)
 
                     # Check break-even
                     if self.config['trading_parameters']['exit_parameters']['break_even']['enabled']:
@@ -134,7 +134,8 @@ class PositionManager:
             self.last_update = datetime.now()
                 
         except Exception as e:
-            self.logger.error(f"Error updating positions: {str(e)}")
+            import traceback
+            self.logger.error(f"Error updating positions: {str(e)}\n{traceback.format_exc()}")
             
     async def _check_close_conditions(self, position):
         """Check if position should be closed based on various conditions"""
@@ -182,7 +183,8 @@ class PositionManager:
             # Check risk/reward
             if not close_position:
                 risk_reward = self._calculate_risk_reward(position)
-                if risk_reward >= self.config['risk_management']['target_risk_reward']:
+                target_rr = self.config.get('take_profit', {}).get('risk_reward_ratio', 2.0)
+                if risk_reward >= target_rr:
                     close_position = True
                     reason = "Target R/R reached"
 
@@ -200,9 +202,9 @@ class PositionManager:
         """Update trailing stop loss"""
         try:
             # Get trailing stop parameters
-            trailing_config = self.config['trading_parameters']['exit_parameters']['trailing_stop']
-            activation_level = trailing_config['activation']
-            step = trailing_config['step']
+            trailing_config = self.config.get('trading_parameters', {}).get('exit_parameters', {}).get('trailing_stop', {})
+            activation_level = trailing_config.get('activation', 0.5)
+            step = trailing_config.get('step', 0.1)
 
             # Calculate profit in points
             point = mt5.symbol_info(position.symbol).point
@@ -790,8 +792,8 @@ class PositionManager:
         """Update breakeven stop for a position"""
         try:
             # Get breakeven stop settings
-            breakeven_config = self.config['trading_parameters']['exit_parameters']['break_even']
-            activation_level = breakeven_config['activation']
+            breakeven_config = self.config.get('trading_parameters', {}).get('exit_parameters', {}).get('break_even', {})
+            activation_level = breakeven_config.get('activation', 1.0)
 
             # Calculate profit in points
             point = mt5.symbol_info(position.symbol).point
@@ -837,8 +839,10 @@ class PositionManager:
                         corr_matrix[(sym1, sym2)] = correlation
                         
             # Check for highly correlated positions
-            threshold = self.config['trading']['position_management']['consolidation']['correlation_threshold']
-            max_correlated = self.config['trading']['position_management']['consolidation']['max_positions_correlated']
+            # Check for highly correlated positions
+            pos_management = self.config.get('trading', {}).get('position_management', {}).get('consolidation', {})
+            threshold = pos_management.get('correlation_threshold', 0.8)
+            max_correlated = pos_management.get('max_positions_correlated', 2)
             
             # Group correlated positions
             correlated_groups = []
