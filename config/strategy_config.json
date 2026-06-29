@@ -51,6 +51,7 @@
         }
     },
     "machine_learning": {
+        "enabled": true,
         "MODEL_PATH": "models/trading_model.joblib",
         "RETRAIN_INTERVAL_DAYS": 7,
         "MIN_TRAINING_SAMPLES": 1000,

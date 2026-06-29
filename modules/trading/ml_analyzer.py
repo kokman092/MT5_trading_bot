@@ -572,6 +572,10 @@ class MLAnalyzer:
     async def predict(self, data: pd.DataFrame, symbol: str, timeframe: str) -> Dict:
         """Make prediction using trained model"""
         try:
+            # Bypass predictions if Machine Learning is disabled in configuration
+            if not self.config.get('machine_learning', {}).get('enabled', True):
+                return {'prediction': None, 'confidence': 0, 'signal': 'neutral'}
+                
             symbol_tf = f"{symbol}_{timeframe}"
             start_time = time.time()
             
