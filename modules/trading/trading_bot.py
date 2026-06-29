@@ -182,14 +182,19 @@ class TradingBot:
                     self.logger.error(f"Error calculating position size for {symbol}: {str(e)}")
                     final_signal.position_size = 0.01
 
+                # Prevent trading with 0.0 lots
+                if final_signal.position_size <= 0:
+                    self.logger.warning(f"{symbol}: Position size calculated is {final_signal.position_size}, skipping trade execution")
+                    return
+
                 # Validate trading conditions
                 try:
                     if await self.risk_manager.validate_trade(symbol, final_signal):
                         self.logger.info(f"{symbol}: Trade validated, executing...")
+                        # Record trade time immediately to prevent race conditions during execution
+                        self._last_trade_time[symbol] = datetime.now()
                         # Execute trade
                         await self.trade_executor.execute_trade(final_signal)
-                        # Record trade time for cooldown
-                        self._last_trade_time[symbol] = datetime.now()
                     else:
                         self.logger.info(f"{symbol}: Trade rejected by risk manager")
                 except Exception as e:
