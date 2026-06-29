@@ -133,12 +133,25 @@ class TradingBot:
                 try:
                     account_info = await self.broker.get_account_info()
                     balance = account_info.get('balance', 10000.0) if account_info else 10000.0
+                    # Build a dictionary of market metrics for risk manager adjustments
+                    volatility = 1.0
+                    if market_analysis and 'market_structure' in market_analysis:
+                        volatility = market_analysis['market_structure'].get('volatility', 1.0)
+                        
+                    market_info_dict = {
+                        'regime': {'regime': regime} if isinstance(regime, str) else regime,
+                        'confidence': ml_result.get('confidence', 0.5) if ml_result else 0.5,
+                        'volatility': volatility,
+                        'signal_strength': getattr(final_signal, 'confidence', 0.5),
+                        'strategy_type': 'trend_following' if regime in ['bull', 'bear'] else 'mean_reversion'
+                    }
+
                     pos_size, risk_info = await self.risk_manager.calculate_position_size(
                         symbol=symbol,
                         entry_price=final_signal.entry_price,
                         stop_loss=final_signal.stop_loss,
                         account_balance=balance,
-                        market_data=market_data
+                        market_data=market_info_dict
                     )
                     final_signal.position_size = pos_size
                 except Exception as e:

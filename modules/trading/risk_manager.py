@@ -190,6 +190,10 @@ class RiskManager:
                                      market_data: Optional[Dict] = None) -> Tuple[float, Dict]:
         """Calculate position size based on risk parameters and current market conditions"""
         try:
+            # Ensure market_data is a dictionary and not a DataFrame
+            if isinstance(market_data, pd.DataFrame):
+                market_data = None
+
             # Calculate basic position size
             if entry_price <= 0 or stop_loss <= 0:
                 return 0.0, {"error": "Invalid price levels"}
@@ -197,9 +201,23 @@ class RiskManager:
             # Calculate risk amount
             risk_amount = self._get_current_risk_percentage() * account_balance
             
-            # Calculate stop loss distance in pips/points
+            # Fetch point size and tick value from MT5 symbol info to calculate distance in points correctly
+            point = 0.00001
+            tick_value = 1.0
+            symbol_info = mt5.symbol_info(symbol)
+            if symbol_info:
+                point = symbol_info.point
+                tick_value = symbol_info.trade_tick_value
+            else:
+                if "JPY" in symbol:
+                    point = 0.001
+                elif "XAU" in symbol:
+                    point = 0.01
+
+            # Calculate stop loss distance in points/pips
             is_long = entry_price > stop_loss
-            pip_distance = abs(entry_price - stop_loss)
+            price_distance = abs(entry_price - stop_loss)
+            pip_distance = price_distance / point if point > 0 else price_distance
             
             # Validate minimum stop loss distance
             min_stop_distance = self.config['risk_management'].get('min_stop_distance', 10)
@@ -208,13 +226,8 @@ class RiskManager:
                 pip_distance = min_stop_distance
                 
             # Calculate position size in lots
-            if pip_distance == 0:
-                return 0.0, {"error": "Zero stop loss distance"}
-                
-            # Get tick value and lot size from symbol properties
-            tick_value = self._get_tick_value(symbol)
-            if tick_value <= 0:
-                return 0.0, {"error": "Invalid tick value"}
+            if pip_distance == 0 or tick_value <= 0:
+                return 0.0, {"error": "Zero stop loss distance or invalid tick value"}
                 
             # Basic position size calculation
             position_size = risk_amount / (pip_distance * tick_value)
