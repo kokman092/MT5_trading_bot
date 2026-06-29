@@ -61,13 +61,8 @@ class TradingBot:
             
             while self.running:
                 try:
-                    # Process each symbol
-                    for symbol in self.symbols:
-                        if not self.running:
-                            break
-                        await self._process_symbol(symbol)
-                        
-                    self.logger.info(f"Market analysis cycle completed for: {self.symbols}")
+                    # Note: Symbol processing loop is driven by ProfessionalTradingSystem in run_trader.py
+                    # to prevent duplicate analysis and MT5 API race conditions.
                         
                     # Manage existing positions
                     try:
