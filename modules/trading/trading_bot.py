@@ -235,7 +235,7 @@ class TradingBot:
             
             # Adjust signal confidence based on ML prediction
             new_confidence = final_signal.confidence
-            if ml_signals:
+            if ml_signals and ml_signals.get('direction') not in [None, 'neutral', 'none']:
                 if ml_signals.get('direction') == final_signal.direction:
                     new_confidence *= (1 + ml_signals.get('confidence', 0))
                 else:
