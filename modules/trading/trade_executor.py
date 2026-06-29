@@ -57,6 +57,9 @@ class TradeExecutor:
         self.order_history = []
         self.max_order_history = 1000
         
+        # Position tracking
+        self.open_positions = {}
+        
         # Smart order routing
         self.smart_routing_enabled = self.config.get('execution', {}).get('smart_routing', {}).get('enabled', False)
         self.time_of_day_analysis = {}

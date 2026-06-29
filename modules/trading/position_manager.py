@@ -117,11 +117,11 @@ class PositionManager:
                 if symbol_data is not None:
                     # Update trailing stop
                     if self.config['trading_parameters']['exit_parameters']['trailing_stop']['enabled']:
-                        self._update_trailing_stop(position)
+                        await self._update_trailing_stop(position)
 
                     # Check break-even
                     if self.config['trading_parameters']['exit_parameters']['break_even']['enabled']:
-                        self._update_breakeven_stop(position)
+                        await self._update_breakeven_stop(position)
 
                     # Check partial profit taking
                     if self.config['trading_parameters']['exit_parameters']['partial_exit']['enabled']:
@@ -174,7 +174,8 @@ class PositionManager:
                     reason = "Weak trend"
 
                 # Exit on high volatility
-                if volatility > self.config['market_analysis']['volatility_threshold']:
+                high_volatility_threshold = self.config.get('trading', {}).get('market_conditions', {}).get('volatility', {}).get('high_threshold', 0.02)
+                if volatility > high_volatility_threshold:
                     close_position = True
                     reason = "High volatility"
 
@@ -542,7 +543,11 @@ class PositionManager:
             buffer_minutes = timedelta(minutes=15)
             
             for session in self.config['trading']['sessions'].values():
-                if symbol in session['pairs']:
+                applies = True
+                if 'pairs' in session:
+                    applies = symbol in session['pairs']
+                
+                if applies:
                     end_time = datetime.strptime(
                         session['end'], '%H:%M').time()
                     end_dt = datetime.combine(datetime.now().date(), end_time)
@@ -773,12 +778,9 @@ class PositionManager:
             if rates is None:
                 return None
 
-            return {
-                'close': [rate['close'] for rate in rates],
-                'high': [rate['high'] for rate in rates],
-                'low': [rate['low'] for rate in rates],
-                'time': [rate['time'] for rate in rates]
-            }
+            df = pd.DataFrame(rates)
+            df['time'] = pd.to_datetime(df['time'], unit='s')
+            return df
 
         except Exception as e:
             self.logger.error(f"Error getting market data: {str(e)}")
