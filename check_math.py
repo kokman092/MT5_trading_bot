@@ -75,7 +75,13 @@ def test_diagnostics():
     detector = RegimeDetector(config)
     print("Regime Detector initialized successfully!")
 
-    print("14. Running detect_regime on DataFrame...")
+    print("14. Training Regime Detector models (fitting models)...")
+    if detector.initialize_models(df):
+        print("Regime Detector models trained successfully!")
+    else:
+        print("Failed to train Regime Detector models!")
+
+    print("15. Running detect_regime on DataFrame...")
     regime = detector.detect_regime(df)
     if regime:
         print(f"Regime detected successfully! Type: {regime.regime_type}")
