@@ -169,17 +169,6 @@ class PositionManager:
                         close_position = True
                         reason = "RSI oversold"
 
-                # Exit on trend weakness
-                if trend_strength < 0.2:
-                    close_position = True
-                    reason = "Weak trend"
-
-                # Exit on high volatility
-                high_volatility_threshold = self.config.get('trading', {}).get('market_conditions', {}).get('volatility', {}).get('high_threshold', 0.02)
-                if volatility > high_volatility_threshold:
-                    close_position = True
-                    reason = "High volatility"
-
             # Check risk/reward
             if not close_position:
                 risk_reward = self._calculate_risk_reward(position)
@@ -199,33 +188,44 @@ class PositionManager:
             self.logger.error(f"Error checking close conditions: {str(e)}")
 
     def _update_trailing_stop(self, position):
-        """Update trailing stop loss"""
+        """Update trailing stop loss based on R-multiples"""
         try:
-            # Get trailing stop parameters
+            # Get trailing stop parameters (in R-multiples)
             trailing_config = self.config.get('trading_parameters', {}).get('exit_parameters', {}).get('trailing_stop', {})
-            activation_level = trailing_config.get('activation', 0.5)
-            step = trailing_config.get('step', 0.1)
+            activation_r = trailing_config.get('activation', 0.5)
+            step_r = trailing_config.get('step', 0.1)
 
-            # Calculate profit in points
-            point = mt5.symbol_info(position.symbol).point
-            profit_points = (position.price_current -
-                             position.price_open) / point
-            if position.type == 1:  # Sell position
-                profit_points = -profit_points
+            # Calculate Risk (R)
+            if position.sl == 0:
+                return
+            risk = abs(position.price_open - position.sl)
+            if risk == 0:
+                return
+                
+            # Calculate current Reward
+            current_price = position.price_current
+            if position.type == 0:  # Buy
+                reward = current_price - position.price_open
+            else:  # Sell
+                reward = position.price_open - current_price
 
             # Check if trailing stop should be activated
-            if profit_points > activation_level:
-                # Calculate new stop loss level
+            if reward > (activation_r * risk):
+                # Calculate new stop loss level based on step
+                # We want to trail behind the current price by (activation_r - step_r) * risk
+                # But a simpler way is: lock in (reward - step_r*risk)
+                
+                trail_distance = step_r * risk
+                
                 if position.type == 0:  # Buy position
-                    new_sl = position.price_current - (step * point)
-                    if position.sl < new_sl:
-                        self._modify_sl_tp(
-                            position.ticket, new_sl, position.tp)
+                    new_sl = current_price - trail_distance
+                    if position.sl < new_sl < current_price:
+                        self._modify_sl_tp(position.ticket, new_sl, position.tp)
+                        
                 else:  # Sell position
-                    new_sl = position.price_current + (step * point)
-                    if position.sl > new_sl:
-                        self._modify_sl_tp(
-                            position.ticket, new_sl, position.tp)
+                    new_sl = current_price + trail_distance
+                    if position.sl > new_sl > current_price or position.sl == 0:
+                        self._modify_sl_tp(position.ticket, new_sl, position.tp)
 
         except Exception as e:
             self.logger.error(f"Error updating trailing stop: {str(e)}")
@@ -529,7 +529,11 @@ class PositionManager:
                 
             current_price = mt5.symbol_info_tick(
                 position.symbol).bid if position.type == 0 else mt5.symbol_info_tick(position.symbol).ask
-            reward = abs(current_price - position.price_open)
+                
+            if position.type == 0:  # Buy
+                reward = current_price - position.price_open
+            else:  # Sell
+                reward = position.price_open - current_price
             
             return reward / risk
             
@@ -789,22 +793,42 @@ class PositionManager:
             return None
 
     async def _update_breakeven_stop(self, position):
-        """Update breakeven stop for a position"""
+        """Move stop loss to breakeven when profit target is reached"""
         try:
-            # Get breakeven stop settings
+            # Get breakeven stop settings (in R-multiples)
             breakeven_config = self.config.get('trading_parameters', {}).get('exit_parameters', {}).get('break_even', {})
-            activation_level = breakeven_config.get('activation', 1.0)
-
-            # Calculate profit in points
-            point = mt5.symbol_info(position.symbol).point
-            profit_points = (position.price_current -
-                             position.price_open) / point
-            if position.type == 1:  # Sell position
-                profit_points = -profit_points
-
-            # Check if breakeven stop is hit
-            if profit_points <= activation_level:
-                await self._close_position(position.ticket)
+            activation_r = breakeven_config.get('activation', 1.0)
+            
+            # Calculate Risk (R)
+            if position.sl == 0:
+                return
+            risk = abs(position.price_open - position.sl)
+            if risk == 0:
+                return
+                
+            # Calculate current Reward
+            current_price = position.price_current
+            if position.type == 0:  # Buy
+                reward = current_price - position.price_open
+            else:  # Sell
+                reward = position.price_open - current_price
+                
+            # If current reward >= activation_r * risk, move SL to breakeven
+            if reward >= (activation_r * risk):
+                # Calculate breakeven price (entry price + spread buffer)
+                point = mt5.symbol_info(position.symbol).point
+                spread = mt5.symbol_info(position.symbol).spread * point
+                
+                if position.type == 0:  # Buy
+                    breakeven_price = position.price_open + (spread * 1.5)
+                    if position.sl < breakeven_price < current_price:
+                        self._modify_sl_tp(position.ticket, breakeven_price, position.tp)
+                        self.logger.info(f"Moved SL to breakeven for Buy position {position.ticket}")
+                else:  # Sell
+                    breakeven_price = position.price_open - (spread * 1.5)
+                    if position.sl > breakeven_price > current_price:
+                        self._modify_sl_tp(position.ticket, breakeven_price, position.tp)
+                        self.logger.info(f"Moved SL to breakeven for Sell position {position.ticket}")
 
         except Exception as e:
             self.logger.error(f"Error updating breakeven stop: {str(e)}")
