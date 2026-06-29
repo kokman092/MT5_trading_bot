@@ -10,7 +10,7 @@ pandas>=2.2.2
 # Technical Analysis
 ta>=0.11.0
 mplfinance>=0.12.10b0
-pandas-ta @ https://github.com/MerlinR/Pandas-ta-fork/archive/refs/heads/master.zip
+
 
 # Machine Learning and AI
 scikit-learn>=1.4.0
