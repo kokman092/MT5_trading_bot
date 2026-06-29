@@ -259,6 +259,13 @@ class RiskManager:
             confidence_factor = self._calculate_confidence_adjustment(market_data)
             position_size *= confidence_factor
             
+            # Log pre-limit position size and factors
+            self.logger.debug(
+                f"{symbol}: Sizing factors — basic_size={risk_amount / (pip_distance * tick_value):.4f}, "
+                f"portfolio={portfolio_factor:.2f}, volatility={volatility_factor:.2f}, "
+                f"regime={regime_factor:.2f}, exposure={exposure_factor:.2f}, confidence={confidence_factor:.2f}"
+            )
+            
             # Get limits for position size
             min_size = self.config['risk_management'].get('position_sizing', {}).get('min_size', 0.01)
             max_size = self.config['risk_management'].get('position_sizing', {}).get('max_size', 1.0)
@@ -266,9 +273,9 @@ class RiskManager:
             # Ensure position size is within limits
             position_size = max(min_size, min(position_size, max_size))
             
-            # Round position size to valid lot step
+            # Round position size to valid lot step, handling float precision limits safely
             lot_step = self._get_lot_step(symbol)
-            position_size = math.floor(position_size / lot_step) * lot_step
+            position_size = math.floor(round(position_size / lot_step, 6)) * lot_step
             
             # Return position size and risk metrics
             return position_size, {
@@ -931,7 +938,7 @@ class RiskManager:
                     position_size *= trend_factor
                 
                 # Apply win rate adjustment
-                win_rate = self._get_historical_win_rate(symbol, is_long, regime)
+                win_rate = self._get_historical_win_rate(symbol, is_long)
                 if win_rate > 0.6:  # Only increase if win rate is good
                     position_size *= (1.0 + (win_rate - 0.6) * 0.5)  # Up to 20% increase for 100% win rate
                 
