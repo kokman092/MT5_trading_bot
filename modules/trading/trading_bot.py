@@ -203,6 +203,9 @@ class TradingBot:
                 else:
                     new_confidence *= 0.5
             
+            # Ensure confidence stays within valid range [0, 1]
+            new_confidence = min(1.0, max(0.0, new_confidence))
+            
             final_signal.update_confidence(new_confidence)
             return final_signal
             
