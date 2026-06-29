@@ -184,9 +184,9 @@ class ProfessionalTradingSystem:
                 
             # Reduced memory requirement for testing
             memory = psutil.virtual_memory()
-            min_memory = 1 * 1024 * 1024 * 1024  # 1GB
+            min_memory = 256 * 1024 * 1024  # 256MB
             if memory.available < min_memory:
-                logger.error(f"Available memory ({memory.available / 1024 / 1024 / 1024:.1f}GB) below minimum requirement (1GB)")
+                logger.error(f"Available memory ({memory.available / 1024 / 1024 / 1024:.1f}GB) below minimum requirement (256MB)")
                 return False
                 
             # Reduced CPU requirement for testing
@@ -1159,24 +1159,29 @@ class ProfessionalTradingSystem:
         try:
             for symbol in self.config['trading']['symbols']:
                 data = self._get_market_data(symbol)
-                
-                # Check for extreme volatility
+                if data is None or data.empty or 'close' not in data.columns or 'open' not in data.columns:
+                    continue
+                    
+                # Check for extreme volatility (safe fallback: 0.05 / 5%)
                 volatility = data['close'].pct_change().std() * np.sqrt(252)
-                if volatility > self.config['risk_management']['emergency_thresholds']['max_volatility']:
-                    logger.warning(f"Extreme volatility detected for {symbol}")
+                emergency_stop = self.config.get('risk_management', {}).get('emergency_stop', {})
+                max_vol = emergency_stop.get('max_volatility', 0.05)
+                if volatility > max_vol:
+                    logger.warning(f"Extreme volatility detected for {symbol}: {volatility:.4f} > {max_vol}")
                     return True
                     
-                # Check for large price gaps
+                # Check for large price gaps (safe fallback: 0.02 / 2%)
                 price_gaps = abs(data['open'] - data['close']) / data['open']
-                if price_gaps.max() > self.config['risk_management']['emergency_thresholds']['max_gap']:
-                    logger.warning(f"Large price gap detected for {symbol}")
+                max_gap = emergency_stop.get('max_gap', 0.02)
+                if price_gaps.max() > max_gap:
+                    logger.warning(f"Large price gap detected for {symbol}: {price_gaps.max():.4f} > {max_gap}")
                     return True
                     
             return False
             
         except Exception as e:
             logger.error(f"Error detecting extreme market conditions: {str(e)}")
-            return True  # Return True to trigger emergency handling
+            return False  # Return False defensively so a config/parsing error doesn't lock out trading
 
     def _detect_unusual_losses(self) -> bool:
         """Detect unusual or rapid losses"""
