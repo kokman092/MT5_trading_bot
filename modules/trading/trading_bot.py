@@ -1,7 +1,7 @@
 import logging
 import MetaTrader5 as mt5
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional, List
 import asyncio
 from .signal import Signal
@@ -26,6 +26,11 @@ class TradingBot:
         self.ml_analyzer = MLAnalyzer(config)
         self.running = False
         self.symbols = self._get_available_symbols()
+        # Trade cooldown tracking: prevent spam trading the same symbol
+        self._last_trade_time: Dict[str, datetime] = {}
+        self._trade_cooldown = timedelta(seconds=config.get('trading', {}).get('trade_cooldown_seconds', 60))
+        # Minimum confidence to execute a trade
+        self._min_confidence = config.get('trading', {}).get('entry_conditions', {}).get('min_signal_strength', 0.6)
         
     def _get_available_symbols(self) -> List[str]:
         """Get list of available trading symbols based on configuration"""
@@ -134,6 +139,18 @@ class TradingBot:
             if final_signal and final_signal.direction != 'none':
                 self.logger.info(f"{symbol}: Signal detected — direction={final_signal.direction}, "
                                f"confidence={final_signal.confidence:.2f}, strength={final_signal.strength}")
+                
+                # Check minimum confidence threshold
+                if final_signal.confidence < self._min_confidence:
+                    self.logger.info(f"{symbol}: Signal too weak ({final_signal.confidence:.2f} < {self._min_confidence}), skipping")
+                    return
+                    
+                # Check per-symbol trade cooldown
+                last_trade = self._last_trade_time.get(symbol)
+                if last_trade and (datetime.now() - last_trade) < self._trade_cooldown:
+                    remaining = (self._trade_cooldown - (datetime.now() - last_trade)).seconds
+                    self.logger.debug(f"{symbol}: Trade cooldown active, {remaining}s remaining")
+                    return
                 # Calculate position size
                 try:
                     account_info = await self.broker.get_account_info()
@@ -171,6 +188,8 @@ class TradingBot:
                         self.logger.info(f"{symbol}: Trade validated, executing...")
                         # Execute trade
                         await self.trade_executor.execute_trade(final_signal)
+                        # Record trade time for cooldown
+                        self._last_trade_time[symbol] = datetime.now()
                     else:
                         self.logger.info(f"{symbol}: Trade rejected by risk manager")
                 except Exception as e:
