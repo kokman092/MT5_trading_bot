@@ -992,6 +992,9 @@ class ProfessionalTradingSystem:
         try:
             all_data = {}
             for symbol in self.config['trading']['symbols']:
+                # Ensure symbol is selected in MT5 Market Watch
+                mt5.symbol_select(symbol, True)
+                
                 # Get data for multiple timeframes
                 timeframes = self.config['market_analysis']['timeframes']
                 symbol_data = {}
