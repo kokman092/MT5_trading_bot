@@ -8,6 +8,10 @@ mt5_account:
 # Trading Parameters
 trading:
   symbols:
+    - "EURUSD"
+    - "GBPUSD"
+    - "USDJPY"
+    - "AUDUSD"
     - "XAUUSD"
   timeframes:
     primary: "M5"
