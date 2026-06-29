@@ -613,10 +613,15 @@ class MarketAnalyzer:
             atr = ta.volatility.average_true_range(data['high'], data['low'], data['close'], window=14)
             current_atr = atr.iloc[-1]
             
+            # Get multipliers from config or use defaults
+            sl_mult = self.config.get('risk_management', {}).get('stop_loss', {}).get('atr_multiplier', 2.0)
+            tp_ratio = self.config.get('risk_management', {}).get('take_profit', {}).get('risk_reward_ratio', 1.5)
+            tp_mult = sl_mult * tp_ratio
+
             # EMA crossover signals
             if data['ema20'].iloc[-2] <= data['ema50'].iloc[-2] and current_ema20 > current_ema50:
-                stop_loss = current_price - (current_atr * 2)
-                take_profit = current_price + (current_atr * 3)
+                stop_loss = current_price - (current_atr * sl_mult)
+                take_profit = current_price + (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='BUY',
@@ -629,8 +634,8 @@ class MarketAnalyzer:
                     market_context={'trend_strength': self._calculate_trend_strength(data)}
                 ))
             elif data['ema20'].iloc[-2] >= data['ema50'].iloc[-2] and current_ema20 < current_ema50:
-                stop_loss = current_price + (current_atr * 2)
-                take_profit = current_price - (current_atr * 3)
+                stop_loss = current_price + (current_atr * sl_mult)
+                take_profit = current_price - (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='SELL',
@@ -664,10 +669,15 @@ class MarketAnalyzer:
             
             current_price = data['close'].iloc[-1]
             
+            # Get multipliers from config or use defaults
+            sl_mult = self.config.get('risk_management', {}).get('stop_loss', {}).get('atr_multiplier', 1.5)
+            tp_ratio = self.config.get('risk_management', {}).get('take_profit', {}).get('risk_reward_ratio', 1.5)
+            tp_mult = sl_mult * tp_ratio
+
             # RSI signals
             if current_rsi < 30:
-                stop_loss = current_price - (current_atr * 1.5)
-                take_profit = current_price + (current_atr * 2)
+                stop_loss = current_price - (current_atr * sl_mult)
+                take_profit = current_price + (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='BUY',
@@ -680,8 +690,8 @@ class MarketAnalyzer:
                     market_context={'oversold': True}
                 ))
             elif current_rsi > 70:
-                stop_loss = current_price + (current_atr * 1.5)
-                take_profit = current_price - (current_atr * 2)
+                stop_loss = current_price + (current_atr * sl_mult)
+                take_profit = current_price - (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='SELL',
@@ -716,10 +726,15 @@ class MarketAnalyzer:
             atr = ta.volatility.average_true_range(data['high'], data['low'], data['close'], window=14)
             current_atr = atr.iloc[-1]
             
+            # Get multipliers from config or use defaults
+            sl_mult = self.config.get('risk_management', {}).get('stop_loss', {}).get('atr_multiplier', 2.0)
+            tp_ratio = self.config.get('risk_management', {}).get('take_profit', {}).get('risk_reward_ratio', 1.5)
+            tp_mult = sl_mult * tp_ratio
+
             # Bollinger Band signals
             if current_price <= lower.iloc[-1]:
-                stop_loss = current_price - (current_atr * 2)
-                take_profit = current_price + (current_atr * 3)
+                stop_loss = current_price - (current_atr * sl_mult)
+                take_profit = current_price + (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='BUY',
@@ -732,8 +747,8 @@ class MarketAnalyzer:
                     market_context={'volatility': current_volatility}
                 ))
             elif current_price >= upper.iloc[-1]:
-                stop_loss = current_price + (current_atr * 2)
-                take_profit = current_price - (current_atr * 3)
+                stop_loss = current_price + (current_atr * sl_mult)
+                take_profit = current_price - (current_atr * tp_mult)
                 signals.append(Signal(
                     symbol=symbol,
                     type='SELL',
