@@ -284,7 +284,7 @@ class TradeExecutor:
         """Execute smart entry with price action confirmation"""
         try:
             # Wait for optimal entry conditions
-            entry_conditions = await self._wait_for_entry_conditions(signal)
+            entry_conditions = self._wait_for_entry_conditions(signal)
             if not entry_conditions['valid']:
                 return {'success': False, 'error': 'Entry conditions not met'}
 
