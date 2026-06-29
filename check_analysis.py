@@ -44,7 +44,8 @@ def debug_validate_market_data(analyzer, df: pd.DataFrame) -> bool:
         
         print("    [DEBUG-VAL] 5.3. Filtering large gaps...")
         # Check large gaps to filter out standard weekend closures
-        large_gaps = time_diff[time_diff > pd.Timedelta(hours=max_gap_hours)]
+        time_diff_hours = time_diff.dt.total_seconds() / 3600.0
+        large_gaps = time_diff[time_diff_hours > max_gap_hours]
         print(f"    [DEBUG-VAL] Found {len(large_gaps)} large gaps.")
         
         print("    [DEBUG-VAL] 5.4. Looping through large gaps indices...")

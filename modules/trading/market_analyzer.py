@@ -216,7 +216,9 @@ class MarketAnalyzer:
                 max_gap_hours = config.get('max_gap', 24)
                 
                 # Check large gaps to filter out standard weekend closures
-                large_gaps = time_diff[time_diff > pd.Timedelta(hours=max_gap_hours)]
+                # Convert time_diff to float hours to prevent numpy 2.x / pandas 3.x timedelta comparison segfaults
+                time_diff_hours = time_diff.dt.total_seconds() / 3600.0
+                large_gaps = time_diff[time_diff_hours > max_gap_hours]
                 for idx in large_gaps.index:
                     t1 = df['time'].iloc[idx-1]
                     t2 = df['time'].iloc[idx]
