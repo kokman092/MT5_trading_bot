@@ -214,10 +214,25 @@ class MarketAnalyzer:
             if 'time' in df.columns:
                 time_diff = df['time'].diff()
                 max_gap_hours = config.get('max_gap', 24)
-                if time_diff.max().total_seconds() > max_gap_hours * 3600:
-                    validation_errors.append(
-                        f"Data gap detected: {time_diff.max().total_seconds() / 3600:.2f} hours"
-                    )
+                
+                # Check large gaps to filter out standard weekend closures
+                large_gaps = time_diff[time_diff > pd.Timedelta(hours=max_gap_hours)]
+                for idx in large_gaps.index:
+                    t1 = df['time'].iloc[idx-1]
+                    t2 = df['time'].iloc[idx]
+                    gap_seconds = (t2 - t1).total_seconds()
+                    
+                    # Gap is weekend gap if <= 75 hours and spans across Friday evening to Monday morning
+                    is_weekend = False
+                    if gap_seconds <= 75 * 3600:
+                        if t1.weekday() in [4, 5, 6] or t2.weekday() in [5, 6, 0]:
+                            is_weekend = True
+                            
+                    if not is_weekend:
+                        validation_errors.append(
+                            f"Data gap detected: {gap_seconds / 3600:.2f} hours between {t1} and {t2}"
+                        )
+                        break
                     
             # Validate price data if available
             if all(col in df.columns for col in required_columns):
