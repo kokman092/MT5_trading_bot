@@ -1024,9 +1024,18 @@ class ProfessionalTradingSystem:
             tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
             atr = tr.rolling(window=14).mean().iloc[-1]
             
-            # Get volatility thresholds from config
-            min_vol = self.config['market_analysis']['validation']['min_volatility']
-            max_vol = self.config['market_analysis']['validation']['max_volatility']
+            # Get volatility thresholds from config with fallback pathways
+            market_anal = self.config.get('market_analysis', {})
+            validation = market_anal.get('validation', {})
+            if not validation:
+                validation = market_anal.get('entry_filters', {})
+            if not validation:
+                validation = self.config.get('trading', {}).get('entry_conditions', {})
+            if not validation:
+                validation = self.config.get('market_analyzer', {}).get('filter', {})
+                
+            min_vol = validation.get('min_volatility', 0.0001)
+            max_vol = validation.get('max_volatility', 0.02)
             
             # Calculate current volatility as percentage
             current_price = data['close'].iloc[-1]
