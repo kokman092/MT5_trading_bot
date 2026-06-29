@@ -155,18 +155,33 @@ class TradeExecutor:
             # Get market data
             market_data = await self.broker.get_market_data(symbol)
             if not market_data:
+                self.logger.warning(f"{symbol}: Market conditions validation failed (No market data)")
                 return False
 
+            # Get symbol info for digit precision
+            symbol_info = self.broker.get_symbol_info(symbol)
+            if not symbol_info:
+                self.logger.warning(f"{symbol}: Market conditions validation failed (No symbol info)")
+                return False
+
+            # Calculate max spread in points dynamically
+            pip_size = 10 if symbol_info['digits'] in [3, 5] else 1
+            max_spread_pips = self.config.get('trading', {}).get('max_spread_pips', 3.0)
+            max_spread_points = max_spread_pips * pip_size
+
             # Check spread
-            if market_data['spread'] > self.execution_params['max_spread']:
+            if market_data['spread'] > max_spread_points:
+                self.logger.warning(f"{symbol}: Trade rejected - Spread too high ({market_data['spread']} > {max_spread_points} points)")
                 return False
 
             # Check session
             if not self._is_valid_trading_session():
+                self.logger.warning(f"{symbol}: Trade rejected - Not a valid trading session")
                 return False
 
             # Check volatility
             if not self._check_volatility(market_data):
+                self.logger.warning(f"{symbol}: Trade rejected - Volatility check failed")
                 return False
 
             return True
