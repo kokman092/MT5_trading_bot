@@ -168,7 +168,7 @@ class TradeExecutor:
                 return False
 
             # Calculate max spread in points dynamically
-            pip_size = 10 if symbol_info['digits'] in [3, 5] else 1
+            pip_size = 10 if symbol_info['digits'] in [2, 3, 5] else 1
             max_spread_pips = self.config.get('trading', {}).get('max_spread_pips', 3.0)
             max_spread_points = max_spread_pips * pip_size
 
