@@ -134,6 +134,7 @@ class TradingBot:
                     account_info = await self.broker.get_account_info()
                     balance = account_info.get('balance', 10000.0) if account_info else 10000.0
                     # Build a dictionary of market metrics for risk manager adjustments
+                    regime = 'unknown'
                     volatility = 1.0
                     if market_analysis and 'market_structure' in market_analysis:
                         volatility = market_analysis['market_structure'].get('volatility', 1.0)
