@@ -2,6 +2,7 @@ import MetaTrader5 as mt5
 import pandas as pd
 import ta
 import pandas_ta as pta
+from modules.trading.regime_detector import RegimeDetector
 import os
 from dotenv import load_dotenv
 
@@ -65,6 +66,21 @@ def test_diagnostics():
     print("12. Calculating Momentum using pandas_ta (pta.rsi)...")
     df['pta_rsi'] = pta.rsi(df['close'], length=14)
     print("pandas_ta RSI calculated successfully!")
+
+    print("13. Initializing Regime Detector...")
+    # Load configuration first
+    import json
+    with open("config/config.json", "r") as f:
+        config = json.load(f)
+    detector = RegimeDetector(config)
+    print("Regime Detector initialized successfully!")
+
+    print("14. Running detect_regime on DataFrame...")
+    regime = detector.detect_regime(df)
+    if regime:
+        print(f"Regime detected successfully! Type: {regime.regime_type}")
+    else:
+        print("Regime detection returned None.")
     
     print("\nDIAGNOSTICS PASSED! All technical libraries are working correctly.")
     mt5.shutdown()
