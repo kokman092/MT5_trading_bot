@@ -142,7 +142,6 @@
         },
         "market_conditions": {
             "analysis_timeframes": [
-                "M5",
                 "M15",
                 "H1"
             ],
@@ -375,7 +374,6 @@
                 ]
             },
             "timeframes": [
-                "M5",
                 "M15",
                 "H1"
             ],

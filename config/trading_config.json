@@ -67,8 +67,8 @@
         }
     },
     "trading": {
-        "symbols": ["EURUSD", "GBPUSD", "USDJPY"],
-        "timeframes": ["M5", "M15", "H1"],
+        "symbols": ["XAUUSD"],
+        "timeframes": ["M15", "H1"],
         "sessions": {
             "london": {
                 "start": "08:00",
@@ -136,7 +136,7 @@
             "volume_threshold": 1000,
             "news_impact_threshold": 0.8
         },
-        "timeframes": ["M5", "M15", "H1"],
+        "timeframes": ["M15", "H1"],
         "validation": {
             "min_data_points": 100,
             "max_gap": 5,
