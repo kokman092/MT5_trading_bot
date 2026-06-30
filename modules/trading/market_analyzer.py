@@ -858,10 +858,13 @@ class MarketAnalyzer:
                 
             # Enforce major trend alignment (EMA 200)
             major_trend = market_structure.get('major_trend')
-            if major_trend == 'bearish' and signal.type.upper() == 'BUY':
+            is_buy = str(signal.direction).upper() in ['BUY', 'LONG']
+            is_sell = str(signal.direction).upper() in ['SELL', 'SHORT']
+            
+            if major_trend == 'bearish' and is_buy:
                 self.logger.info(f"{signal.symbol}: BUY signal rejected — counter-trend to major EMA 200 bearish trend")
                 return False
-            if major_trend == 'bullish' and signal.type.upper() == 'SELL':
+            if major_trend == 'bullish' and is_sell:
                 self.logger.info(f"{signal.symbol}: SELL signal rejected — counter-trend to major EMA 200 bullish trend")
                 return False
                 
